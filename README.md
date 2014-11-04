@@ -3,6 +3,8 @@ lfa
 
 logistic factor analysis
 
+Pre-print available: http://arxiv.org/abs/1312.2041
+
 Data input
 ===
 
