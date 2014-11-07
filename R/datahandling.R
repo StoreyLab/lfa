@@ -100,6 +100,10 @@ process.tped.recode.line = function(tped.line){
 #' @details Use plink with --make-bed
 #' @return Genotype matrix
 #' @param bed.prefix Path leading to the bed, bim, and fam files.
+#' @examples
+#' # assuming you have PLINK format HapMap data from: http://pngu.mgh.harvard.edu/~purcell/plink/res.shtml
+#' # run this in the unpacked folder
+#' \dontrun{read.bed("hapmap_r23a")}
 #' @export
 read.bed = function(bed.prefix){
     bed.filename = paste(bed.prefix, ".bed", sep="")

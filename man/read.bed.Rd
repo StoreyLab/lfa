@@ -3,7 +3,7 @@
 \alias{read.bed}
 \title{File input: .bed}
 \usage{
-read.bed(bed.prefix, buffer.size = 1e+07)
+read.bed(bed.prefix)
 }
 \arguments{
 \item{bed.prefix}{Path leading to the bed, bim, and fam files.}
@@ -17,5 +17,10 @@ and fam files
 }
 \details{
 Use plink with --make-bed
+}
+\examples{
+# assuming you have PLINK format HapMap data from: http://pngu.mgh.harvard.edu/~purcell/plink/res.shtml
+# run this in the unpacked folder
+\dontrun{read.bed("hapmap_r23a")}
 }
 
