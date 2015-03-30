@@ -134,3 +134,98 @@ check.geno <- function(X){
 check.LF <- function(LF){
     
 }
+
+#' @title LFA model goodness of fit
+#' @details
+#' This function returns p-values for LFA model goodness of fit based
+#' on a simulated null.
+#'
+#' @note Genotype matrix is expected to be a matrix of integers with
+#' values 0, 1, and 2. Currently no support for missing values. Note
+#' that the coding of the SNPs does not affect the algorithm.
+#'
+#' @inheritParams lfa
+#' @param LF matrix of logistic factors
+#' @param B number of null datasets to generate - \eqn{B=1} is usualy
+#' sufficient. If computational time/power allows, a few extra 
+#' \eqn{B} could be helpful
+#' @return vector of p-values for each SNP.
+#' @export
+model.gof <- function(X, LF, B){
+    obs_stat = apply(X, 1, gof.stat.snp, LF)
+    d = ncol(LF)
+    AF = af(X,LF)
+    rm(X)
+    
+    stat0 = compute.nulls(AF, d, B)
+
+    obs_stat_order = order(obs_stat)
+    obs_stat = sort(obs_stat)
+    stat0 = sort(as.vector(stat0))
+    
+    p = rep(0, length(obs_stat))
+    m = length(obs_stat)
+    B0 = length(stat0)
+    i1 = 1
+    i2 = 1
+    
+    while(i1 <= m) {
+        while((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { 
+            i2 = i2+1
+        }
+        p[obs_stat_order[i1]] = 1 - ((i2-1)/B0)
+        i1 = i1+1
+    }
+
+    p
+}
+
+inverse_2x2 = function(X) {
+    denom = X[1]*X[4]-X[2]*X[3]
+    stopifnot(denom != 0)
+    matrix( c(X[4], -X[2],
+              -X[3], X[1]), 2, 2) / denom
+}
+
+gof.stat.snp <- function(snp, LF){
+    #NA_IND = is.na(snp)
+    #snp = snp[!is.na(snp)]
+    #LF  = LF[!NA_IND,]
+    
+    p = af_snp(snp, LF)
+    
+    p0 = (1-p)^2
+    p1 = 2*p*(1-p)
+    
+    est = c(sum(p0), sum(p1))
+    N   = c(sum( snp==0 ), sum( snp==1 ))
+    
+    SIGMA = matrix( c(sum(p0*(1-p0)), -1*sum(p0*p1), 
+                      -1*sum(p0*p1), sum(p1*(1-p1))), 2, 2)
+    
+    stat = t(N-est) %*% inverse_2x2(SIGMA) %*%(N-est)
+    
+    return(stat)
+}
+
+
+
+compute.nulls <- function(AF, d, B) {
+    m = nrow(AF)
+    n = ncol(AF)
+    
+    stat0 = matrix(0, m, B)
+    for(i in 1:B) {
+        X0 = matrix(rbinom(m*n, 2, as.numeric(AF)), m, n)
+        LF = lfa(X0, d)
+        stat0[,i] <- apply(X0, 1, gof.stat.snp, LF)
+    }
+    
+    return(stat0)
+}
+
+
+
+
+
+
