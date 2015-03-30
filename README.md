@@ -10,9 +10,11 @@ Installation
 
 Apple OS X users, see FAQ below.  To install, open R and type:
 
-    install.packages("devtools")
-    library("devtools")
-    install_github("Storeylab/lfa")
+```R
+install.packages("devtools")
+library("devtools")
+install_github("Storeylab/lfa")
+```
 
 Data input
 ===
@@ -30,5 +32,16 @@ If you want to run something but don't have the computing power for it, shoot me
 FAQ
 ===
 
-Apple OS X gfortran related install issues: http://www.thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error. If you know what causes this, let me know!
+Apple OS X users may experience a problem due to Fortran code that is included in this package.  This gfortran issue is discussed here: 
+
+http://www.thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error. 
+
+A solution that has worked for us is to follow the advice given above. Specifically, open a Terminal and type:
+
+```
+curl -O http://r.research.att.com/libs/gfortran-4.8.2-darwin13.tar.bz2
+sudo tar fvxz gfortran-4.8.2-darwin13.tar.bz2 -C /
+```
+
+If you know what causes this, let us know!
 
