@@ -21,17 +21,22 @@ af = function(X, LF, safety=FALSE){
 #' @description Computes individual-specific allele frequencies for a 
 #' single SNP.
 #' @return vector of allele frequencies
-af_snp = function(snp, LF){
-    #b_0 = clreg(snp, LF)
-    #est = .Call("mv", cbind(1, LF), b_0)
-    b_0    = lreg(snp,LF) #coefficients from logreg assuming HWE
-    est    = .Call("mv", LF, b_0)
+#' @export
+af_snp = function(snp, LF, debug_ind=NULL){
+    NA_IND = is.na(snp)
+    af = rep(NA, length(snp))
     
-    exp(est)/(1+exp(est))
+    snp = snp[!NA_IND]
+    LF  = LF[!NA_IND,]
+    b_0 = lreg(snp, LF, debug_ind) #coefficients from logreg assuming HWE
+    est = .Call("mv", LF, b_0)
+    
+    af[!NA_IND] = exp(est)/(1+exp(est))
+    af
 }
 
 #C based logistic regression 
-lreg <- function(y,X){
+lreg <- function(y, X, debug_ind=NULL){
     if(is.null(X) || !hasIntercept(X)){
         stop("you must supply the intercept!")
     }
@@ -39,7 +44,15 @@ lreg <- function(y,X){
     y1 = as.numeric((y==1) | (y==2))
     y2 = as.numeric(y==2)
     y=c(y1,y2)
-    .Call("lreg", X, y, 20, 1e-10)
+    b = .Call("lreg", X, y, 20, 1e-10)
+    
+    #if coefficients are NA, use glm
+    if(sum(is.na(b)) > 0) {
+        print(paste("harmless warning:", debug_ind))
+        b = glm(cbind(y, 2-y) ~ -1 + X, family="binomial")$coef
+        names(b) = NULL
+    }
+    b
 }
 
 hasIntercept <- function(x) {
