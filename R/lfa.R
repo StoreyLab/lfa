@@ -248,9 +248,9 @@ inverse_2x2 = function(X) {
 }
 
 gof.stat.snp <- function(snp, LF){
-    #NA_IND = is.na(snp)
-    #snp = snp[!is.na(snp)]
-    #LF  = LF[!NA_IND,]
+    NA_IND = is.na(snp)
+    snp = snp[!is.na(snp)]
+    LF  = LF[!NA_IND,]
     
     p = af_snp(snp, LF)
     
@@ -276,7 +276,7 @@ compute.nulls <- function(AF, d, B) {
     
     stat0 = matrix(0, m, B)
     for(i in 1:B) {
-        X0 = matrix(rbinom(m*n, 2, as.numeric(AF)), m, n)
+        suppressWarnings(X0 <- matrix(rbinom(m*n, 2, as.numeric(AF)), m, n))
         LF = lfa(X0, d)
         stat0[,i] <- apply(X0, 1, gof.stat.snp, LF)
     }
