@@ -86,15 +86,15 @@ SEXP lreg(SEXP RX, SEXP Ry, SEXP Rmi, SEXP Rtol){
         //actually inverting here. remember to pay attention to includes
         F77_CALL(dgetrf)(dimX+1,dimX+1,w,dimX+1,ipiv,&info);
         if(info != 0) {
-            Rprintf("warning: dgetrf error, NA used\n");
-            Rprintf("info:%i iter:%i\n", info, iter);
+            //Rprintf("warning: dgetrf error, NA used\n");
+            //Rprintf("info:%i iter:%i\n", info, iter);
             //error("dgetrf error\n");
             flag = 1;
         }
         F77_CALL(dgetri)(dimX+1,w,dimX+1,ipiv,wo,&numblock,&info);
         if(info != 0) {
-            Rprintf("warning: dgetri error, NA used\n");
-            Rprintf("info:%i iter:%i\n", info, iter);
+            //Rprintf("warning: dgetri error, NA used\n");
+            //Rprintf("info:%i iter:%i\n", info, iter);
             //error("dgetri error\n");
             flag = 1;
         }
