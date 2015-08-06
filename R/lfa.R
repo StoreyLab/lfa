@@ -250,7 +250,7 @@ inverse_2x2 = function(X) {
 gof.stat.snp <- function(snp, LF){
     NA_IND = is.na(snp)
     snp = snp[!is.na(snp)]
-    LF  = LF[!NA_IND,]
+    LF  = LF[!NA_IND, ,drop=FALSE]
     
     p = af_snp(snp, LF)
     
@@ -267,8 +267,6 @@ gof.stat.snp <- function(snp, LF){
     
     return(stat)
 }
-
-
 
 compute.nulls <- function(AF, d, B) {
     m = nrow(AF)

@@ -66,3 +66,66 @@ hasIntercept <- function(x) {
     }
 }
 
+#' @title PCA Allele frequencies
+#' @description Compute matrix of individual-specific allele frequencies via PCA
+#' @inheritParams lfa
+#' @details placeholder
+#' @return Matrix of individual-specific allele frequencies.
+#' @export
+pca_af = function(X, d, override=FALSE){
+    m = nrow(X)
+    n = ncol(X)
+    
+    #check for d validity
+    if(d != as.integer(d)){
+        stop("d should be integer")
+    } else if(d < 1){
+        stop("d should be at least 1")
+    } else if(d == 1){
+        return(matrix(1, n, 1))
+    } else if(d >1){
+        d = d-1 #for the svd stuff
+    }
+    
+    adjust = 8
+    if((n-d ) < 10) adjust=n-d-1
+
+    #index the missing values
+    NA_IND = is.na(X)
+    
+    #center the matrix...
+    mean_X = rowMeans(X, na.rm=TRUE)
+    norm_X = X - mean_X
+    #sd_X = apply(X, 1, function(snp){sd(snp, na.rm=TRUE)})
+    
+    #...then 'impute'
+    for(i in 1:n) { #is column-wise the best decision here?
+        norm_X[NA_IND[,i],i] = 0
+    }
+    
+    mysvd = trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
+    
+    rm(norm_X)
+    D = mysvd$d
+    U = mysvd$u
+    V = mysvd$v
+    rm(mysvd)
+    
+    z = U %*% diag(D, d, d)  %*% t(V)
+        
+    z = z + mean_X
+    z = z/2
+    
+    AF = t(apply(z, 1, function(x) {
+            IND = x > 1 - 1/(2*n)
+            x[IND] = 1 - 1/(2*n)
+            IND = x < 1/(2*n)
+            x[IND] = 1/(2*n)
+            x
+           }))
+    
+    rm(z)
+    
+    AF[NA_IND] = NA
+    return(AF)
+}
