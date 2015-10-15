@@ -1,14 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <R.h>
-#include <Rinternals.h>
-#include <Rmath.h>
-#include <R_ext/Applic.h>
-#include <R_ext/Lapack.h>
-
-#define getDims(A) INTEGER(coerceVector(getAttrib(A, R_DimSymbol), INTSXP))
-
+#include "lfa.h"
 
 //logistic regression
 //you MUST add the constant before this

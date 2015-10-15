@@ -9,6 +9,9 @@
 #' return value is all doubles. It could be wise to pass only a 
 #' selection of the SNPs in your genotype matrix to get an idea for
 #' memory usage. Use \code{gc} to check memory usage!
+#' @examples
+#' LF = lfa(hgdp_subset, 4)
+#' allele_freqs = af(hgdp_subset, LF)
 #' @return Matrix of individual-specific allele frequencies.
 #' @export
 af = function(X, LF, safety=FALSE){
@@ -20,15 +23,17 @@ af = function(X, LF, safety=FALSE){
 #' @title Allele frequencies for SNP
 #' @description Computes individual-specific allele frequencies for a 
 #' single SNP.
+#' @inheritParams af
+#' @param snp vector of 0's, 1's, and 2's
 #' @return vector of allele frequencies
 #' @export
-af_snp = function(snp, LF, debug_ind=NULL){
+af_snp = function(snp, LF){
     NA_IND = is.na(snp)
     af = rep(NA, length(snp))
     
     snp = snp[!NA_IND]
     LF  = LF[!NA_IND,]
-    b_0 = lreg(snp, LF, debug_ind) #coefficients from logreg assuming HWE
+    b_0 = lreg(snp, LF) #coefficients from logreg 
     est = .Call("mv", LF, b_0)
     
     af[!NA_IND] = exp(est)/(1+exp(est))
@@ -36,7 +41,7 @@ af_snp = function(snp, LF, debug_ind=NULL){
 }
 
 #C based logistic regression 
-lreg <- function(y, X, debug_ind=NULL){
+lreg <- function(y, X){
     if(is.null(X) || !hasIntercept(X)){
         stop("you must supply the intercept!")
     }
@@ -48,7 +53,7 @@ lreg <- function(y, X, debug_ind=NULL){
     
     #if coefficients are NA, use glm
     if(sum(is.na(b)) > 0) {
-        print(paste("harmless warning:", debug_ind))
+        print(paste("harmless warning:"))
         b = glm(cbind(y, 2-y) ~ -1 + X, family="binomial")$coef
         names(b) = NULL
     }
@@ -67,10 +72,17 @@ hasIntercept <- function(x) {
 }
 
 #' @title PCA Allele frequencies
-#' @description Compute matrix of individual-specific allele frequencies via PCA
+#' @description Compute matrix of individual-specific allele frequencies
+#' via PCA
 #' @inheritParams lfa
-#' @details placeholder
+#' @details This corresponds to algorithm 1 in the paper. Only used for
+#' comparison purposes.
 #' @return Matrix of individual-specific allele frequencies.
+#' @examples
+#' LF = lfa(hgdp_subset, 4)
+#' allele_freqs_lfa = af(hgdp_subset, LF)
+#' allele_freqs_pca = pca_af(hgdp_subset, 4, LF)
+#' summary(abs(allele_freqs_lfa-allele_freqs_pca))
 #' @export
 pca_af = function(X, d, override=FALSE){
     m = nrow(X)

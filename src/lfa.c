@@ -1,13 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <R.h>
-#include <Rinternals.h>
-#include <Rmath.h>
-#include <R_ext/Applic.h>
-#include <R_ext/Lapack.h>
-
-#define getDims(A) INTEGER(coerceVector(getAttrib(A, R_DimSymbol), INTSXP))
+#include "lfa.h"
 
 SEXP lfa_threshold(SEXP RX, SEXP Rthresh){
     int *dimX, n, i, ind;
@@ -57,14 +48,13 @@ SEXP lfa_threshold(SEXP RX, SEXP Rthresh){
 //except be really efficient by taking full advantage of passing by
 //reference.
 SEXP lfa_scaling(SEXP RX, SEXP RZ){
-    int *dimX, *dimZ, n, i, ind;
+    int *dimX, n, i, ind;
     double *X, *Z, mean, sd;
     
     dimX = getDims(RX);
     PROTECT(RX = coerceVector(RX, REALSXP));
     X = REAL(RX);
     
-    dimZ = getDims(RZ);
     PROTECT(RZ = coerceVector(RZ, REALSXP));
     Z = REAL(RZ);
     

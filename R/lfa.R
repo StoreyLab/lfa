@@ -31,6 +31,11 @@
 #' matrices, which require a non-trivial amount of computation.
 #' @return matrix of logistic factors, with the intercept at the end.
 #' @export
+#' @examples
+#' LF = lfa(hgdp_subset, 4)
+#' dim(LF)
+#' head(LF)
+#' @importFrom corpcor fast.svd
 #' @useDynLib lfa
 lfa = function(X, d, override=FALSE, safety=FALSE){
     if(safety)
@@ -91,9 +96,6 @@ lfa = function(X, d, override=FALSE, safety=FALSE){
     v = cbind(v,1)
     return(v)
 }
-
-#' @title lfa with missing data handling (test)
-#' 
 
 lfa_na = function(X, d, override=FALSE){
     m = nrow(X)
@@ -156,7 +158,10 @@ lfa_na = function(X, d, override=FALSE){
 #' C routine to row-center and scale a matrix
 #'
 #' @param A matrix
+#' @examples
+#' centerscale(hgdp_subset)
 #' @return matrix same dimensions \code{A} but row centered and scaled
+#' @export
 centerscale <- function(A){
     as.matrix(.Call("centerscale", A))
 }
@@ -167,7 +172,10 @@ centerscale <- function(A){
 #' C routine to row-center a matrix
 #'
 #' @param A matrix
+#' @examples
+#' center(hgdp_subset)
 #' @return matrix same dimensions \code{A} but row centered
+#' @export
 center <- function(A){
     as.matrix(.Call("center", A))
 }
@@ -209,6 +217,13 @@ check.geno <- function(X){
 #' @param B number of null datasets to generate - \eqn{B=1} is usualy
 #' sufficient. If computational time/power allows, a few extra 
 #' \eqn{B} could be helpful
+#' @examples
+#' LF = lfa(hgdp_subset, 4)
+#' gof_4 = model.gof(hgdp_subset, LF, 3)
+#' LF = lfa(hgdp_subset, 10)
+#' gof_10 = model.gof(hgdp_subset, LF, 3)
+#' hist(gof_4)
+#' hist(gof_10)
 #' @return vector of p-values for each SNP.
 #' @export
 model.gof <- function(X, LF, B){

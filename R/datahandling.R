@@ -6,12 +6,14 @@
 #' that uses a growing matrix for the genotypes so it is to your 
 #' benefit to have as large a \code{buffer.size} as possible. 
 #' @param tped.filename Path to your .tped file after tranposing and recoding.
+#' @param buffer.size Number of characters to keep in the buffer 
+#' @examples
+#' #assuming you have a .tped file in the right directory
+#' x = NULL
+#' \dontrun{x = read.tped.recode("file.tped")}
 #' @return genotype matrix with elements 0, 1, 2, and NA.
 #' @export
-read.tped.recode <- function(tped.filename, tfam.filename=NULL, buffer.size=5e8){
-    if(!is.null(tfam.filename)) {
-        warning("currently no tfam support!")
-    }
+read.tped.recode <- function(tped.filename, buffer.size=5e8){
     
     # check first line of tped to set up the parameters
     tped.line = readLines(tped.filename, n=1)
@@ -103,7 +105,8 @@ process.tped.recode.line = function(tped.line){
 #' @examples
 #' # assuming you have PLINK format HapMap data from: http://pngu.mgh.harvard.edu/~purcell/plink/res.shtml
 #' # run this in the unpacked folder
-#' \dontrun{read.bed("hapmap_r23a")}
+#' x = NULL
+#' \dontrun{x = read.bed("hapmap_r23a")}
 #' @export
 read.bed = function(bed.prefix){
     bed.filename = paste(bed.prefix, ".bed", sep="")
@@ -157,7 +160,8 @@ read.bed = function(bed.prefix){
     
     #read in SNPs!
     for(i in 1:m){
-        indices = readBin(bed, what="int", n=numbytes, size=1, signed=F)+1
+        indices = readBin(bed, what="int", n=numbytes, size=1, 
+	  signed=FALSE)+1
         snp.in = snp.map[,indices]
         X[i,] = as.vector(snp.in[1:n])
         

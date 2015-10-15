@@ -21,7 +21,7 @@
 \usepackage{subfig}
 
 \title{Logistic Factor Analysis Vignette}
-\author{Wei Hao, Minsun Song, John Storey}
+\author{Wei Hao, Minsun Song, John D. Storey}
 \date{\today}
 
 \begin{document}
@@ -63,11 +63,12 @@ head(LF)
 We can plot the first two logistic factors and color by geographical 
 information:
 
-<<lfa_plot>>=
+<<lfa_plot, fig.width=5, fig.height=4.5>>=
 dat = data.frame(LF[,1], LF[,2], colnames(hgdp_subset))
 colnames(dat) = c("LF1", "LF2", "geo")
 library(ggplot2)
-ggplot(dat, aes(LF1, LF2, color=geo)) + geom_point() + theme_bw()
+ggplot(dat, aes(LF1, LF2, color=geo)) + geom_point() + theme_bw() +
+  coord_fixed(ratio=(max(dat[,1])-min(dat[,1]))/(max(dat[,2])-min(dat[,2])))
 @
 
 One aspect of \texttt{lfa} is that the return value is a matrix of 
@@ -104,7 +105,6 @@ log_lik = sapply(1:nrow(hgdp_subset), function(i) {ll(hgdp_subset[i,], allele_fr
 which(max(log_lik) == log_lik)
 @
 
-%\section{Choosing $d$}
 \section{Data Input}
 
 The best way to load genotypes is by using the function \texttt{read.bed},

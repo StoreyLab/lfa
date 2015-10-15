@@ -22,22 +22,33 @@
 #' a dramatic difference in larger datasets. Since the wrapper is 
 #' technically not a matrix multiplication function, it seemed wise
 #' to make a copy of the function.
+#' @param A matrix
+#' @param d number of singular vectors
+#' @param adjust extra singular vectors to calculate for accuracy
+#' @param tol convergence criterion
+#' @param V optional initial guess
+#' @param seed seed
+#' @param ltrace debugging output
+#' @param override TRUE means we use fast.svd instead of the iterative
+#' algorithm (useful for small data or very high d).
 #' @return list with singular value decomposition.
-trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V = NULL, seed=1234, ltrace = FALSE, override=FALSE) 
+trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL, 
+ seed=NULL, ltrace = FALSE, override=FALSE) 
 {
-#    set.seed(seed)
+    if (!is.null(seed)) set.seed(seed)
+    maxit = 1000
     eps <- .Machine$double.eps
     
     m <- nrow(A)
     n <- ncol(A)
     
     #uses fast.svd() instead if approximate conditions are satisified
-    if(m*n < 1000000 || m<1000 || n<100 || override){
-        mysvd = fast.svd(A)
+    if(m*n < 1000000 || m < 1000 || n < 100 || override){
+        mysvd = corpcor::fast.svd(A)
         return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
     }
     if(d > n/20){
-        mysvd = fast.svd(A)
+        mysvd = corpcor::fast.svd(A)
         return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
     }
     
@@ -54,6 +65,8 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
         stop("tol must be non-negative")
     if (maxit <= 0) 
         stop("maxit must be positive")
+    
+    m_b = 3
     if (m_b >= min(n, m)) {
         m_b <- floor(min(n, m) - 0.1)
         if (m_b - d - 1 < 0) {
@@ -73,7 +86,7 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
         tol <- eps
     
     W <- matrix(0, m, m_b)
-    F <- matrix(0, n, 1)
+    G <- matrix(0, n, 1)
     if (is.null(V)) {
         V <- matrix(0, n, m_b)
         V[, 1] <- rnorm(n)
@@ -95,10 +108,6 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
     norm <- function(x) return(as.numeric(sqrt(crossprod(x))))
 
     orthog <- function(Y, X) {
-#        if (dim(X)[2] < dim(Y)[2]) 
-#            dotY <- crossprod(X, Y)
-#        else dotY <- t(crossprod(Y, X))
-#        return(Y - X %*% dotY)
         return(Y - X %*% crossprod(X,Y))
     }
 
@@ -125,7 +134,6 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
         else j <- d+1
         
         #compute W=AV using mv
-        #W[, j] <- as.matrix(A %*% V[, j, drop = FALSE])
         W[,j] <- as.matrix(.Call("mv", A, V[,j,drop=FALSE]))
         
         #orthogonalize W
@@ -149,32 +157,30 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
         
         #lanczos steps
         while (j <= m_b) {
-            #F <- t(as.matrix(crossprod(W[, j, drop = FALSE], A)))
-            F <- as.matrix(.Call("tmv", A, W[,j,drop=FALSE]))
+            G <- as.matrix(.Call("tmv", A, W[,j,drop=FALSE]))
 
-            F <- F - S * V[, j, drop = FALSE]
+            G <- G - S * V[, j, drop = FALSE]
             
             #orthog
-            F <- orthog(F, V[, 1:j, drop = FALSE])
+            G <- orthog(G, V[, 1:j, drop = FALSE])
             
             #while not the 'edge' of the bidiagonal matrix
             if (j+1 <= m_b) {
-                R <- norm(F)
+                R <- norm(G)
                 #check for dependence
                 if (R <= SVTol) {
-                    F <- matrix(rnorm(nrow(V)),nrow(V),1)
-                    F <- orthog(F, V[, 1:j, drop = FALSE])
-                    V[, j+1] <- F/norm(F)
+                    G <- matrix(rnorm(nrow(V)),nrow(V),1)
+                    G <- orthog(G, V[, 1:j, drop = FALSE])
+                    V[, j+1] <- G/norm(G)
                     R <- 0
                 }
-                else V[, j+1] <- F/R
+                else V[, j+1] <- G/R
                 
                 #make block diag matrix
                 if (is.null(B)) B <- cbind(S, R)
                 else B <- rbind(cbind(B, 0), c(rep(0, j-1), S, R))
 
-                #W[, j+1] <- as.matrix(A %*% V[, j+1, drop = FALSE])
-                W[,j+1] <- as.matrix(.Call("mv", A, V[,j+1,drop=FALSE]))
+                W[,j+1] <- as.matrix(.Call("mv", A, V[,j+1,drop = FALSE]))
                 
                 #reorthog
                 W[, j+1] <- W[, j+1, drop = FALSE] - W[, j, drop = FALSE] * R
@@ -201,8 +207,8 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
         
         #compute SVD of bidiag matrix 
         Bsz <- nrow(B)
-        R_F <- norm(F)
-        F <- F/R_F
+        R_F <- norm(G)
+        G <- G/R_F
         Bsvd <- svd(B)
         
         #print(rev(sort(sapply(ls(), function (object.name) object.size(get(object.name))))))
@@ -232,7 +238,7 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
             break
         
         #next step in iteration --- re-initialize starting V and B
-        V[, 1:(d+dim(F)[2])] <- cbind(V[, 1:(dim(Bsvd$v)[1]), drop = FALSE] %*% Bsvd$v[, 1:d, drop = FALSE], F)
+        V[, 1:(d+dim(G)[2])] <- cbind(V[, 1:(dim(Bsvd$v)[1]), drop = FALSE] %*% Bsvd$v[, 1:d, drop = FALSE], G)
         B <- cbind(diag(Bsvd$d[1:d, drop = FALSE]), R[1:d, drop = FALSE])
         
         #update left SVd
@@ -248,8 +254,6 @@ trunc.svd <- function (A, d, adjust = 3, maxit = 1000, m_b = 3, tol = 1e-10, V =
     return(list(d = d, u = u, v = v, iter = iter))
 }
 
-#' @title Matrix-vector multiplication
-#' @details Wrapper for \code{dgemv}
 mv = function(A, B, transpose=FALSE){
     if(!transpose){
         as.matrix(.Call("mv",  A, B))
