@@ -32,7 +32,7 @@ af_snp = function(snp, LF){
     af = rep(NA, length(snp))
     
     snp = snp[!NA_IND]
-    LF  = LF[!NA_IND,]
+    LF  = LF[!NA_IND, , drop=FALSE]
     b_0 = lreg(snp, LF) #coefficients from logreg 
     est = .Call("mv", LF, b_0)
     
