@@ -27,6 +27,8 @@
 #' @param d number of logistic factors, including the intercept
 #' @param override optional boolean to bypass Lanczos bidiagonalization
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
+#' @param use.centerscale optional boolean to utilize a C routine for centering & scaling a matrix
+#' @param use.center optional boolean to utilize a C routine for centering a matrix
 #' @param safety optional boolean to bypass checks on the genotype 
 #' matrices, which require a non-trivial amount of computation.
 #' @return matrix of logistic factors, with the intercept at the end.
@@ -37,7 +39,7 @@
 #' head(LF)
 #' @importFrom corpcor fast.svd
 #' @useDynLib lfa
-lfa = function(X, d, override=FALSE, safety=FALSE){
+lfa = function(X, d, override=FALSE, use.centerscale=TRUE, use.center=TRUE, safety=FALSE){
     if(safety)
         check.geno(X)
     
@@ -63,7 +65,11 @@ lfa = function(X, d, override=FALSE, safety=FALSE){
     adjust = 8
     if((n-d ) < 10) adjust=n-d-1
     
-    norm_X = center(X)
+    if(use.center) {
+        norm_X = center(X)
+    } else {
+        norm_X = scale(X, center = TRUE, scale = FALSE)
+    }
     mysvd = trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
     
     mean_X = apply(X,1,mean)
@@ -91,7 +97,12 @@ lfa = function(X, d, override=FALSE, safety=FALSE){
     z = z[ind,]
     z = log(z/(1-z))
 
-    norm_z = centerscale(z)
+    if(use.centerscale) {
+        norm_z = centerscale(z)
+    } else {
+        norm_z = scale(z, center = TRUE, scale = TRUE)
+    }
+        
     v = trunc.svd(norm_z, d=d, adjust=adjust, tol=1e-13, override=override)$v
     v = cbind(v,1)
     return(v)
