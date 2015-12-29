@@ -184,22 +184,27 @@ center <- function(A){
 check.geno <- function(X){
     ret = FALSE
     if(class(X) != "matrix")
-        stop("expecting genotypes in class matrix")
+        stop("The input must be genotypes in a Matrix class.")
 
     if(class(X[1]) != "integer")
-        stop("elements of genotype matrix should be integer")
+        stop("Elements of the genotype matrix should be integer.")
 
     classes = names(table(as.vector(X)))
     if(length(classes) != 3)
-        stop("expecting genotypes to be 0, 1, and 2")
+        stop("Expecting genotypes to be 0, 1, and 2.")
     if(classes != c("0", "1", "2"))
-        stop("expecting genotypes to be 0, 1, and 2")
+        stop("Expecting genotypes to be 0, 1, and 2.")
+
+    unique.length = apply(X,1,function(x) length(unique(x)))
+    if(sum(unique.length==1) > 1) {
+      stop(paste0("Remove ", unique.length," loci without any variation across samples."))
+    }
 
     m = nrow(X)
     n = ncol(X)
 
     if(m <=n )
-        stop("genotype matrix should be tall")
+        stop("The genotype matrix should be tall.")
 
 }
 
