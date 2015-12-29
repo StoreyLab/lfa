@@ -184,7 +184,7 @@ center <- function(A){
 check.geno <- function(X){
     ret = FALSE
     if(class(X) != "matrix")
-        stop("The input must be genotypes in a Matrix class.")
+        stop("The input must be genotypes in a matrix class.")
 
     if(class(X[1]) != "integer")
         stop("Elements of the genotype matrix should be integer.")
