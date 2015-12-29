@@ -10,24 +10,24 @@
 
 
 #' @title Logistic factor analysis.
-#' 
-#' @details
-#' This function performs logistic factor analysis on SNP data. As it 
-#' stands, we follow the convention where \eqn{d=1} is intercept only,
-#' and for \eqn{d>1} we compute \eqn{d-1} singular vectors and postpend 
-#' the intercept. 
 #'
-#' @note Genotype matrix is expected to be a matrix of integers with 
-#' values 0, 1, and 2. Currently no support for missing values. Note 
+#' @details
+#' This function performs logistic factor analysis on SNP data. As it
+#' stands, we follow the convention where \eqn{d=1} is intercept only,
+#' and for \eqn{d>1} we compute \eqn{d-1} singular vectors and postpend
+#' the intercept.
+#'
+#' @note Genotype matrix is expected to be a matrix of integers with
+#' values 0, 1, and 2. Currently no support for missing values. Note
 #' that the coding of the SNPs does not affect the algorithm.
 #'
-#' @param X a matrix of SNP genotypes, i.e. an integer matrix of 0's, 
-#' 1's, and 2's. Sparse matrices of class Matrix are not supported 
+#' @param X a matrix of SNP genotypes, i.e. an integer matrix of 0's,
+#' 1's, and 2's. Sparse matrices of class Matrix are not supported
 #' (yet).
 #' @param d number of logistic factors, including the intercept
 #' @param override optional boolean to bypass Lanczos bidiagonalization
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
-#' @param safety optional boolean to bypass checks on the genotype 
+#' @param safety optional boolean to bypass checks on the genotype
 #' matrices, which require a non-trivial amount of computation.
 #' @return matrix of logistic factors, with the intercept at the end.
 #' @export
@@ -40,12 +40,12 @@
 lfa = function(X, d, override=FALSE, safety=FALSE){
     if(safety)
         check.geno(X)
-    
+
     if(sum(is.na(X)) > 0){
         LF = lfa_na(X, d, override=override)
         return(LF)
     }
-    
+
     m = nrow(X)
     n = ncol(X)
 
@@ -59,24 +59,24 @@ lfa = function(X, d, override=FALSE, safety=FALSE){
     } else if(d >1){
         d = d-1 #for the svd stuff
     }
-    
+
     adjust = 8
     if((n-d ) < 10) adjust=n-d-1
-    
+
     norm_X = center(X)
     mysvd = trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
-    
+
     mean_X = apply(X,1,mean)
     sd_X = apply(X,1,sd)
-    
+
     rm(norm_X)
     D = mysvd$d
     U = mysvd$u
     V = mysvd$v
     rm(mysvd)
-    
+
     z = U %*% diag(D, d, d)  %*% t(V)
-        
+
     #z = (z*sd_X) + mean_X
     z = z + mean_X
     z = z/2
@@ -100,7 +100,7 @@ lfa = function(X, d, override=FALSE, safety=FALSE){
 lfa_na = function(X, d, override=FALSE){
     m = nrow(X)
     n = ncol(X)
-    
+
     #check for d validity
     if(d != as.integer(d)){
         stop("d should be integer")
@@ -111,33 +111,33 @@ lfa_na = function(X, d, override=FALSE){
     } else if(d >1){
         d = d-1 #for the svd stuff
     }
-    
+
     adjust = 8
     if((n-d ) < 10) adjust=n-d-1
 
     #index the missing values
     NA_IND = is.na(X)
-    
+
     #center the matrix...
     mean_X = rowMeans(X, na.rm=TRUE)
     norm_X = X - mean_X
     #sd_X = apply(X, 1, function(snp){sd(snp, na.rm=TRUE)})
-    
+
     #...then 'impute'
     for(i in 1:n) { #is column-wise the best decision here?
         norm_X[NA_IND[,i],i] = 0
     }
-    
+
     mysvd = trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
-    
+
     rm(norm_X)
     D = mysvd$d
     U = mysvd$u
     V = mysvd$v
     rm(mysvd)
-    
+
     z = U %*% diag(D, d, d)  %*% t(V)
-        
+
     z = z + mean_X
     z = z/2
     rm(U); rm(D); rm(V)
@@ -153,7 +153,7 @@ lfa_na = function(X, d, override=FALSE){
 }
 
 #' @title Matrix centering and scaling
-#' 
+#'
 #' @description
 #' C routine to row-center and scale a matrix
 #'
@@ -167,7 +167,7 @@ centerscale <- function(A){
 }
 
 #' @title Matrix centering
-#' 
+#'
 #' @description
 #' C routine to row-center a matrix
 #'
@@ -185,22 +185,22 @@ check.geno <- function(X){
     ret = FALSE
     if(class(X) != "matrix")
         stop("expecting genotypes in class matrix")
-    
+
     if(class(X[1]) != "integer")
         stop("elements of genotype matrix should be integer")
-    
+
     classes = names(table(as.vector(X)))
     if(length(classes) != 3)
         stop("expecting genotypes to be 0, 1, and 2")
     if(classes != c("0", "1", "2"))
         stop("expecting genotypes to be 0, 1, and 2")
-    
+
     m = nrow(X)
     n = ncol(X)
-    
+
     if(m <=n )
-        stop("genotype matrix shoudl be tall")
-    
+        stop("genotype matrix should be tall")
+
 }
 
 #' @title LFA model goodness of fit
@@ -215,7 +215,7 @@ check.geno <- function(X){
 #' @inheritParams lfa
 #' @param LF matrix of logistic factors
 #' @param B number of null datasets to generate - \eqn{B=1} is usualy
-#' sufficient. If computational time/power allows, a few extra 
+#' sufficient. If computational time/power allows, a few extra
 #' \eqn{B} could be helpful
 #' @examples
 #' LF = lfa(hgdp_subset, 4)
@@ -231,21 +231,21 @@ model.gof <- function(X, LF, B){
     d = ncol(LF)
     AF = af(X,LF)
     rm(X)
-    
+
     stat0 = compute.nulls(AF, d, B)
 
     obs_stat_order = order(obs_stat)
     obs_stat = sort(obs_stat)
     stat0 = sort(as.vector(stat0))
-    
+
     p = rep(0, length(obs_stat))
     m = length(obs_stat)
     B0 = length(stat0)
     i1 = 1
     i2 = 1
-    
+
     while(i1 <= m) {
-        while((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { 
+        while((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) {
             i2 = i2+1
         }
         p[obs_stat_order[i1]] = 1 - ((i2-1)/B0)
@@ -266,34 +266,34 @@ gof.stat.snp <- function(snp, LF){
     NA_IND = is.na(snp)
     snp = snp[!is.na(snp)]
     LF  = LF[!NA_IND, ,drop=FALSE]
-    
+
     p = af_snp(snp, LF)
-    
+
     p0 = (1-p)^2
     p1 = 2*p*(1-p)
-    
+
     est = c(sum(p0), sum(p1))
     N   = c(sum( snp==0 ), sum( snp==1 ))
-    
-    SIGMA = matrix( c(sum(p0*(1-p0)), -1*sum(p0*p1), 
+
+    SIGMA = matrix( c(sum(p0*(1-p0)), -1*sum(p0*p1),
                       -1*sum(p0*p1), sum(p1*(1-p1))), 2, 2)
-    
+
     stat = t(N-est) %*% inverse_2x2(SIGMA) %*%(N-est)
-    
+
     return(stat)
 }
 
 compute.nulls <- function(AF, d, B) {
     m = nrow(AF)
     n = ncol(AF)
-    
+
     stat0 = matrix(0, m, B)
     for(i in 1:B) {
         suppressWarnings(X0 <- matrix(rbinom(m*n, 2, as.numeric(AF)), m, n))
         LF = lfa(X0, d)
         stat0[,i] <- apply(X0, 1, gof.stat.snp, LF)
     }
-    
+
     return(stat0)
 }
 
