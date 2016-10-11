@@ -43,7 +43,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     n <- ncol(A)
     
     #uses fast.svd() instead if approximate conditions are satisified
-    if(m*n < 1000000 || m < 1000 || n < 100 || override){
+    if((log10(m)+log10(n)) <= 6 || m < 1000 || n < 100 || override){
         mysvd = corpcor::fast.svd(A)
         return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
     }
