@@ -36,7 +36,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
  seed=NULL, ltrace = FALSE, override=FALSE) 
 {
     if (!is.null(seed)) set.seed(seed)
-    maxit = 1000
+    maxit <- 1000
     eps <- .Machine$double.eps
     
     m <- nrow(A)
@@ -44,11 +44,11 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     
     #uses fast.svd() instead if approximate conditions are satisified
     if((log10(m)+log10(n)) <= 6 || m < 1000 || n < 100 || override){
-        mysvd = corpcor::fast.svd(A)
+        mysvd <- corpcor::fast.svd(A)
         return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
     }
     if(d > n/20){
-        mysvd = corpcor::fast.svd(A)
+        mysvd <- corpcor::fast.svd(A)
         return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
     }
     
@@ -66,7 +66,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     if (maxit <= 0) 
         stop("maxit must be positive")
     
-    m_b = 3
+    m_b <- 3
     if (m_b >= min(n, m)) {
         m_b <- floor(min(n, m) - 0.1)
         if (m_b - d - 1 < 0) {
@@ -254,7 +254,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     return(list(d = d, u = u, v = v, iter = iter))
 }
 
-mv = function(A, B, transpose=FALSE){
+mv <- function(A, B, transpose=FALSE){
     if(!transpose){
         as.matrix(.Call("mv",  A, B))
     } else if(transpose){
