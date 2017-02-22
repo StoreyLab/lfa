@@ -117,6 +117,9 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     norm_z <- centerscale(z)
     v <- trunc.svd(norm_z, d=d, adjust=adjust, tol=1e-13, override=override)$v
     v <- cbind(v,1)
+    if(!is.null(adjustments)){
+        v <- cbind(adjustments, v)
+    }
     return(v)
 }
 
