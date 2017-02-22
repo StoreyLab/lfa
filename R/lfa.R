@@ -18,13 +18,15 @@
 #' the intercept.
 #'
 #' @note Genotype matrix is expected to be a matrix of integers with
-#' values 0, 1, and 2. Currently no support for missing values. Note
+#' values 0, 1, and 2. Note
 #' that the coding of the SNPs does not affect the algorithm.
 #'
 #' @param X a matrix of SNP genotypes, i.e. an integer matrix of 0's,
 #' 1's, and 2's. Sparse matrices of class Matrix are not supported
 #' (yet).
 #' @param d number of logistic factors, including the intercept
+#' @param adjustment a matrix of adjustment to hold fixed during
+#' estimation. 
 #' @param override optional boolean to bypass Lanczos bidiagonalization
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
 #' @param safety optional boolean to bypass checks on the genotype
@@ -32,24 +34,32 @@
 #' @return matrix of logistic factors, with the intercept at the end.
 #' @export
 #' @examples
-#' LF = lfa(hgdp_subset, 4)
+#' LF <- lfa(hgdp_subset, 4)
 #' dim(LF)
 #' head(LF)
 #' @importFrom corpcor fast.svd
 #' @useDynLib lfa
-lfa <- function(X, d, override=FALSE, safety=FALSE){
+lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     if(safety)
         check.geno(X)
-
-    if(sum(is.na(X)) > 0){
-        LF <- lfa_na(X, d, override=override)
-        return(LF)
+    
+    # check adjustments vars
+    if(!is.null(adjustments)){
+        if (nrow(adjustments) != ncol(X)){
+          stop("adjustments needs to have same number of rows as individuals")
+        }
+        if (ncol(adjustments) >= d){
+          stop("need to estimate at least one non-adjustment logistic factor")
+        }
+        if (sum(!complete.cases(adjustments)) > 0){
+          stop("no missing values in adjustments")
+        }
     }
-
+    
     m <- nrow(X)
     n <- ncol(X)
 
-    #check for d validity
+    # check for d validity
     if(d != as.integer(d)){
         stop("d should be integer")
     } else if(d < 1){
@@ -59,25 +69,38 @@ lfa <- function(X, d, override=FALSE, safety=FALSE){
     } else if(d >1){
         d <- d-1 #for the svd stuff
     }
-
+    
     adjust <- 8
     if((n-d ) < 10) adjust <- n-d-1
+    
+    # index the missing values
+    NA_IND <- is.na(X)
+    
+    #center the matrix...
+    mean_X <- rowMeans(X, na.rm=TRUE)
+    norm_X <- X - mean_X
 
-    norm_X <- center(X)
+    # ...then 'impute'
+    norm_X[NA_IND] <- 0
+    
+    # regress out adjustment variables, if needed
+    if(!is.null(adjustments)){
+      system.time(adjustments<-residuals(lm(t(norm_X)~adjustments-1)))
+      d <- d-ncol(adjustments)
+    }
+    
+    # first SVD
     mysvd <- trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
-
-    mean_X <- apply(X,1,mean)
-    sd_X <- apply(X,1,sd)
 
     rm(norm_X)
     D <- mysvd$d
     U <- mysvd$u
     V <- mysvd$v
     rm(mysvd)
-
+    
+    # form projection
     z <- U %*% diag(D, d, d)  %*% t(V)
 
-    #z <- (z*sd_X) + mean_X
     z <- z + mean_X
     z <- z/2
     rm(U); rm(D); rm(V)
@@ -97,63 +120,10 @@ lfa <- function(X, d, override=FALSE, safety=FALSE){
     return(v)
 }
 
-lfa_na <- function(X, d, override=FALSE){
-    m <- nrow(X)
-    n <- ncol(X)
-
-    #check for d validity
-    if(d != as.integer(d)){
-        stop("d should be integer")
-    } else if(d < 1){
-        stop("d should be at least 1")
-    } else if(d == 1){
-        return(matrix(1, n, 1))
-    } else if(d >1){
-        d <- d-1 #for the svd stuff
-    }
-
-    adjust <- 8
-    if((n-d ) < 10) adjust <- n-d-1
-
-    #index the missing values
-    NA_IND <- is.na(X)
-
-    #center the matrix...
-    mean_X <- rowMeans(X, na.rm=TRUE)
-    norm_X <- X - mean_X
-    #sd_X <- apply(X, 1, function(snp){sd(snp, na.rm=TRUE)})
-
-    #...then 'impute'
-    norm_X[NA_IND] <- 0
-
-    mysvd <- trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
-
-    rm(norm_X)
-    D <- mysvd$d
-    U <- mysvd$u
-    V <- mysvd$v
-    rm(mysvd)
-
-    z <- U %*% diag(D, d, d)  %*% t(V)
-
-    z <- z + mean_X
-    z <- z/2
-    rm(U); rm(D); rm(V)
-
-    ind <- as.logical(.Call("lfa_threshold", z, 1/(2*n)))
-    z <- z[ind,]
-    z <- log(z/(1-z))
-
-    norm_z <- centerscale(z)
-    v <- trunc.svd(norm_z, d=d, adjust=adjust, tol=1e-13, override=override)$v
-    v <- cbind(v,1)
-    return(v)
-}
-
 #' @title Matrix centering and scaling
 #'
 #' @description
-#' C routine to row-center and scale a matrix
+#' C routine to row-center and scale a matrix. Doesn't work with missing data.
 #'
 #' @param A matrix
 #' @examples
