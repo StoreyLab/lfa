@@ -88,7 +88,7 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
       system.time(adjustments<-residuals(lm(t(norm_X)~adjustments-1)))
       d <- d-ncol(adjustments)
     }
-    
+    print(d)
     # first SVD
     mysvd <- trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
 
