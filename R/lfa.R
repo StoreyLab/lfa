@@ -87,9 +87,8 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     # regress out adjustment variables, if needed
     if(!is.null(adjustments)){
       models <- lm(t(norm_X)~adjustments-1)
-      ajustment_coefs <- coefs(models)
+      adjustment_coefs <- t(coef(models))
       norm_X <- t(residuals(models))
-      print(dim(norm_X))
       rm(models)
     }
     
@@ -97,13 +96,23 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     mysvd <- trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
 
     rm(norm_X)
-    D <- mysvd$d
+    D <- diag(mysvd$d, d, d)
     U <- mysvd$u
     V <- mysvd$v
     rm(mysvd)
     
+    if(!is.null(adjustments)){
+      D <- c( rep(1, ncol(adjustments)), diag(D) )
+      D <- diag(D, d+ncol(adjustments), d+ncol(adjustments))
+      U <- cbind(adjustment_coefs, U)
+      V <- cbind(adjustments, V)
+      print(length(D))
+      print(dim(U))
+      print(dim(V))
+    }
+
     # form projection
-    z <- U %*% diag(D, d, d)  %*% t(V)
+    z <- U %*% D %*% t(V)
 
     z <- z + mean_X
     z <- z/2
@@ -119,10 +128,15 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     z <- log(z/(1-z))
 
     norm_z <- centerscale(z)
+
+    if(!is.null(adjustments)){
+      norm_z <- t(residuals(lm(t(norm_z)~adjustments-1)))
+    }
+
     v <- trunc.svd(norm_z, d=d, adjust=adjust, tol=1e-13, override=override)$v
     v <- cbind(v,1)
     if(!is.null(adjustments)){
-        v <- cbind(adjustments, v)
+      v <- cbind(adjustments, v)
     }
     return(v)
 }
