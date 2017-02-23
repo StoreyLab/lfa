@@ -86,8 +86,11 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     
     # regress out adjustment variables, if needed
     if(!is.null(adjustments)){
-      system.time(norm_X<-t(residuals(lm(t(norm_X)~adjustments-1))))
+      models <- lm(t(norm_X)~adjustments-1)
+      ajustment_coefs <- coefs(models)
+      norm_X <- t(residuals(models))
       print(dim(norm_X))
+      rm(models)
     }
     
     # first SVD
