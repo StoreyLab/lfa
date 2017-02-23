@@ -43,19 +43,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     if(safety)
         check.geno(X)
     
-    # check adjustments vars
-    if(!is.null(adjustments)){
-        if (nrow(adjustments) != ncol(X)){
-          stop("adjustments needs to have same number of rows as individuals")
-        }
-        if (ncol(adjustments) >= d){
-          stop("need to estimate at least one non-adjustment logistic factor")
-        }
-        if (sum(!complete.cases(adjustments)) > 0){
-          stop("no missing values in adjustments")
-        }
-    }
-    
     m <- nrow(X)
     n <- ncol(X)
 
@@ -68,6 +55,20 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
         return(matrix(1, n, 1))
     } else if(d >1){
         d <- d-1 #for the svd stuff
+    }
+    
+    # check adjustments vars
+    if(!is.null(adjustments)){
+        if (nrow(adjustments) != ncol(X)){
+          stop("adjustments needs to have same number of rows as individuals")
+        }
+        if (ncol(adjustments) >= d){
+          stop("need to estimate at least one non-adjustment logistic factor")
+        }
+        if (sum(!complete.cases(adjustments)) > 0){
+          stop("no missing values in adjustments")
+        }
+        d <- d-ncol(adjustments)
     }
     
     adjust <- 8
@@ -86,7 +87,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     # regress out adjustment variables, if needed
     if(!is.null(adjustments)){
       system.time(adjustments<-residuals(lm(t(norm_X)~adjustments-1)))
-      d <- d-ncol(adjustments)
     }
     print(d)
     # first SVD
