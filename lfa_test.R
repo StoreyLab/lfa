@@ -1,0 +1,5 @@
+library(lfa)
+load("~/tmp/hgdp/tmp.RData")
+X <- read.bed("~/tmp/hgdp/HGDP_940")
+LF <- lfa(X, 10, adjustments=LF_old[,1:4])
+all.equal(abs(LF), abs(LF_old))
