@@ -86,7 +86,7 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     
     # regress out adjustment variables, if needed
     if(!is.null(adjustments)){
-      system.time(norm_X<-residuals(lm(t(norm_X)~adjustments-1)))
+      system.time(norm_X<-t(residuals(lm(t(norm_X)~adjustments-1))))
       print(dim(norm_X))
     }
     
