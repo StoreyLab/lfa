@@ -68,7 +68,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
         if (sum(!complete.cases(adjustments)) > 0){
           stop("no missing values in adjustments")
         }
-        d <- d-ncol(adjustments)
     }
     
     adjust <- 8
@@ -84,14 +83,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     # ...then 'impute'
     norm_X[NA_IND] <- 0
     
-    # regress out adjustment variables, if needed
-    if(!is.null(adjustments)){
-      models <- lm(t(norm_X)~adjustments-1)
-      adjustment_coefs <- t(coef(models))
-      norm_X <- t(residuals(models))
-      rm(models)
-    }
-    
     # first SVD
     mysvd <- trunc.svd(norm_X, d=d, adjust=adjust, tol=1e-13, override=override)
 
@@ -101,16 +92,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     V <- mysvd$v
     rm(mysvd)
     
-    if(!is.null(adjustments)){
-      D <- c( rep(1, ncol(adjustments)), diag(D) )
-      D <- diag(D, d+ncol(adjustments), d+ncol(adjustments))
-      U <- cbind(adjustment_coefs, U)
-      V <- cbind(adjustments, V)
-      print(length(D))
-      print(dim(U))
-      print(dim(V))
-    }
-
     # form projection
     z <- U %*% D %*% t(V)
 
@@ -130,9 +111,11 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     z <- log(z/(1-z))
 
     norm_z <- centerscale(z)
-
+    
+    # regress out adjustment vars, if relevant
     if(!is.null(adjustments)){
       norm_z <- t(residuals(lm(t(norm_z)~adjustments-1)))
+      d <- d - ncol(adjustments)
     }
 
     v <- trunc.svd(norm_z, d=d, adjust=adjust, tol=1e-13, override=override)$v
