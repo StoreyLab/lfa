@@ -136,13 +136,15 @@ SEXP centerscale(SEXP RA){
         m = mean(A+i, dimA[1], dimA[0]);
         s = sd(A+i, dimA[1], dimA[0]);
         
-/*        if( i ==0) {
-            printf("%f %f\n", m, s);
-        }*/
-        
         for(j = 0; j < dimA[1]; j++){
-            ret[ind] = (A[ind] - m)/s;
-            ind += dimA[0];
+            if (s != 0) {
+                ret[ind] = (A[ind] - m)/s;
+                ind += dimA[0];
+            }
+            else {
+                ret[ind] = 0;
+                ind += dimA[0];
+            }
         }
     }
     
