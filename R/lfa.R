@@ -98,9 +98,7 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE, ploidy=2){
 
     z <- z + mean_X
     z <- z / ploidy
-    rm(U); rm(D); rm(V)
-
-    print(summary(as.vector(z)))
+    rm(U); rm(D); rm(V) 
 
     #The .Call() is equivalent to the following lines of R code:
     #
