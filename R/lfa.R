@@ -99,8 +99,6 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     z <- z/2
     rm(U); rm(D); rm(V)
 
-    print(summary(as.vector(z)))
-
     #The .Call() is equivalent to the following lines of R code:
     #
     #zmin <- apply(z, 1, min)
