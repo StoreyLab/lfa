@@ -9,7 +9,11 @@
 #  GNU General Public License for more details.
 
 
-#' @title Logistic factor analysis.
+#' @title Logistic factor analysis
+#'
+#' @description
+#' Fit a factor model of dimension \eqn{d} for binomial data. Returns 
+#' logistic factors.
 #'
 #' @details
 #' This function performs logistic factor analysis on SNP data. As it
@@ -25,8 +29,8 @@
 #' 1's, and 2's. Sparse matrices of class Matrix are not supported
 #' (yet).
 #' @param d number of logistic factors, including the intercept
-#' @param adjustment a matrix of adjustment to hold fixed during
-#' estimation. 
+#' @param adjustments a matrix of adjustment variables to hold fixed 
+#' during estimation. 
 #' @param override optional boolean to bypass Lanczos bidiagonalization
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
 #' @param safety optional boolean to bypass checks on the genotype
@@ -181,6 +185,12 @@ check.geno <- function(X){
 }
 
 #' @title LFA model goodness of fit
+#' 
+#' @description
+#' Compute SNP-by-SNP goodness-of-fit when compared to population 
+#' structure. This can be aggregated to determine genome-wide 
+#' goodness-of-fit for a particular value of \eqn{d}.
+#' 
 #' @details
 #' This function returns p-values for LFA model goodness of fit based
 #' on a simulated null.

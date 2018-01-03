@@ -2,7 +2,7 @@
 % Please edit documentation in R/lfa.R
 \name{lfa}
 \alias{lfa}
-\title{Logistic factor analysis.}
+\title{Logistic factor analysis}
 \usage{
 lfa(X, d, adjustments = NULL, override = FALSE, safety = FALSE)
 }
@@ -13,17 +13,21 @@ lfa(X, d, adjustments = NULL, override = FALSE, safety = FALSE)
 
 \item{d}{number of logistic factors, including the intercept}
 
+\item{adjustments}{a matrix of adjustment variables to hold fixed 
+during estimation.}
+
 \item{override}{optional boolean to bypass Lanczos bidiagonalization
 SVD. Usually not advised unless encountering a bug in the SVD code.}
 
 \item{safety}{optional boolean to bypass checks on the genotype
 matrices, which require a non-trivial amount of computation.}
-
-\item{adjustment}{a matrix of adjustment to hold fixed during
-estimation.}
 }
 \value{
 matrix of logistic factors, with the intercept at the end.
+}
+\description{
+Fit a factor model of dimension \eqn{d} for binomial data. Returns 
+logistic factors.
 }
 \details{
 This function performs logistic factor analysis on SNP data. As it

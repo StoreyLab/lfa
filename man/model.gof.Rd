@@ -20,6 +20,11 @@ sufficient. If computational time/power allows, a few extra
 \value{
 vector of p-values for each SNP.
 }
+\description{
+Compute SNP-by-SNP goodness-of-fit when compared to population 
+structure. This can be aggregated to determine genome-wide 
+goodness-of-fit for a particular value of \eqn{d}.
+}
 \details{
 This function returns p-values for LFA model goodness of fit based
 on a simulated null.

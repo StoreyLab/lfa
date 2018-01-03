@@ -28,6 +28,9 @@ algorithm (useful for small data or very high d).}
 \value{
 list with singular value decomposition.
 }
+\description{
+Truncated SVD
+}
 \details{
 Performs singular value decomposition but only returns the first 
 \code{d} singular vectors/values. The truncated SVD utilizes Lanczos
