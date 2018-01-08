@@ -190,7 +190,8 @@ check.geno <- function(X){
 #' Compute structural Hardy-Weinberg Equilibrium (sHWE) p-values
 #' on a SNP-by-SNP basis. These p-values can be aggregated to 
 #' determine genome-wide goodness-of-fit for a particular value
-#' of \eqn{d}. See [FILL IN URL] for more details.
+#' of \eqn{d}. See \url{https://doi.org/10.1101/240804} for more
+#' details.
 #'
 #' @param LF matrix of logistic factors
 #' @param B number of null datasets to generate - \eqn{B=1} is usualy
