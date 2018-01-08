@@ -184,36 +184,30 @@ check.geno <- function(X){
 
 }
 
-#' @title LFA model goodness of fit
+#' @title Hardy-Weinberg Equilibrium in structure populations
 #' 
 #' @description
-#' Compute SNP-by-SNP goodness-of-fit when compared to population 
-#' structure. This can be aggregated to determine genome-wide 
-#' goodness-of-fit for a particular value of \eqn{d}.
-#' 
-#' @details
-#' This function returns p-values for LFA model goodness of fit based
-#' on a simulated null.
+#' Compute structural Hardy-Weinberg Equilibrium (sHWE) p-values
+#' on a SNP-by-SNP basis. These p-values can be aggregated to 
+#' determine genome-wide goodness-of-fit for a particular value
+#' of \eqn{d}. See [FILL IN URL] for more details.
 #'
-#' @note Genotype matrix is expected to be a matrix of integers with
-#' values 0, 1, and 2. Currently no support for missing values. Note
-#' that the coding of the SNPs does not affect the algorithm.
-#'
-#' @inheritParams lfa
 #' @param LF matrix of logistic factors
 #' @param B number of null datasets to generate - \eqn{B=1} is usualy
 #' sufficient. If computational time/power allows, a few extra
 #' \eqn{B} could be helpful
+#' @inheritParams lfa
+#' @inheritParams sHWE
 #' @examples
-#' LF = lfa(hgdp_subset, 4)
-#' gof_4 = model.gof(hgdp_subset, LF, 3)
-#' LF = lfa(hgdp_subset, 10)
-#' gof_10 = model.gof(hgdp_subset, LF, 3)
+#' LF <- lfa(hgdp_subset, 4)
+#' gof_4 <- sHWE(hgdp_subset, LF, 3)
+#' LF <- lfa(hgdp_subset, 10)
+#' gof_10 <- sHWE(hgdp_subset, LF, 3)
 #' hist(gof_4)
 #' hist(gof_10)
-#' @return vector of p-values for each SNP.
+#' @return a vector of p-values for each SNP.
 #' @export
-model.gof <- function(X, LF, B){
+sHWE <- function(X, LF, B){
     obs_stat <- apply(X, 1, gof.stat.snp, LF)
     d <- ncol(LF)
     AF <- af(X,LF)
@@ -241,6 +235,34 @@ model.gof <- function(X, LF, B){
 
     p
 }
+
+#' @title LFA model goodness of fit
+#' 
+#' @description
+#' Compute SNP-by-SNP goodness-of-fit when compared to population 
+#' structure. This can be aggregated to determine genome-wide 
+#' goodness-of-fit for a particular value of \eqn{d}.
+#' 
+#' @details
+#' This function returns p-values for LFA model goodness of fit based
+#' on a simulated null.
+#'
+#' @note Genotype matrix is expected to be a matrix of integers with
+#' values 0, 1, and 2. Currently no support for missing values. Note
+#' that the coding of the SNPs does not affect the algorithm.
+#'
+#' @inheritParams lfa
+#' @inheritParams sHWE
+#' @examples
+#' LF <- lfa(hgdp_subset, 4)
+#' gof_4 <- model.gof(hgdp_subset, LF, 3)
+#' LF <- lfa(hgdp_subset, 10)
+#' gof_10 <- model.gof(hgdp_subset, LF, 3)
+#' hist(gof_4)
+#' hist(gof_10)
+#' @return vector of p-values for each SNP.
+#' @export
+model.gof <- sHWE
 
 inverse_2x2 <- function(X) {
     denom <- X[1]*X[4]-X[2]*X[3]

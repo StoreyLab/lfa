@@ -35,10 +35,10 @@ values 0, 1, and 2. Currently no support for missing values. Note
 that the coding of the SNPs does not affect the algorithm.
 }
 \examples{
-LF = lfa(hgdp_subset, 4)
-gof_4 = model.gof(hgdp_subset, LF, 3)
-LF = lfa(hgdp_subset, 10)
-gof_10 = model.gof(hgdp_subset, LF, 3)
+LF <- lfa(hgdp_subset, 4)
+gof_4 <- model.gof(hgdp_subset, LF, 3)
+LF <- lfa(hgdp_subset, 10)
+gof_10 <- model.gof(hgdp_subset, LF, 3)
 hist(gof_4)
 hist(gof_10)
 }
