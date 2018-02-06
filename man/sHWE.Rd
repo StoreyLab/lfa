@@ -24,7 +24,8 @@ a vector of p-values for each SNP.
 Compute structural Hardy-Weinberg Equilibrium (sHWE) p-values
 on a SNP-by-SNP basis. These p-values can be aggregated to 
 determine genome-wide goodness-of-fit for a particular value
-of \eqn{d}. See [FILL IN URL] for more details.
+of \eqn{d}. See \url{https://doi.org/10.1101/240804} for more
+details.
 }
 \examples{
 LF <- lfa(hgdp_subset, 4)
