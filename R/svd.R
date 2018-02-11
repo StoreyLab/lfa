@@ -19,12 +19,11 @@
 #' \code{d} singular vectors/values. The truncated SVD utilizes Lanczos
 #' bidiagonalization. See references.
 #' 
-#' This function was modified from the package irlba 1.0.1 (?) under 
-#' GPL. The 
-#' of the \code{crossprod()} calls with the C wrapper to \code{dgemv} is
-#' a dramatic difference in larger datasets. Since the wrapper is 
-#' technically not a matrix multiplication function, it seemed wise
-#' to make a copy of the function.
+#' This function was modified from the package irlba 1.0.1 under 
+#' GPL. Replacing the \code{crossprod()} calls with the C wrapper to 
+#' \code{dgemv} is a dramatic difference in larger datasets. Since the 
+#' wrapper is technically not a matrix multiplication function, it seemed 
+#' wise to make a copy of the function.
 #' @param A matrix
 #' @param d number of singular vectors
 #' @param adjust extra singular vectors to calculate for accuracy
