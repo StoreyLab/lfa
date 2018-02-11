@@ -35,6 +35,7 @@
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
 #' @param safety optional boolean to bypass checks on the genotype
 #' matrices, which require a non-trivial amount of computation.
+#' @param ploidy ploidy of data, defaults to 2 for bi-allelic unphased SNPs
 #' @return matrix of logistic factors, with the intercept at the end.
 #' @export
 #' @examples
@@ -43,7 +44,7 @@
 #' head(LF)
 #' @importFrom corpcor fast.svd
 #' @useDynLib lfa
-lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
+lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE, ploidy=2){
     if(safety)
         check.geno(X)
     
@@ -80,7 +81,7 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     # index the missing values
     NA_IND <- is.na(X)
     
-    #center the matrix...
+    # center the matrix...
     mean_X <- rowMeans(X, na.rm=TRUE)
     norm_X <- X - mean_X
 
@@ -100,15 +101,16 @@ lfa <- function(X, d, adjustments=NULL, override=FALSE, safety=FALSE){
     z <- U %*% D %*% t(V)
 
     z <- z + mean_X
-    z <- z/2
-    rm(U); rm(D); rm(V)
+    z <- z / ploidy
+    rm(U); rm(D); rm(V) 
+
 
     #The .Call() is equivalent to the following lines of R code:
     #
     #zmin <- apply(z, 1, min)
     #zmax <- apply(z, 1, max)
-    #ind  <- (zmax<(1-2/n)) & (zmin>(2/n))
-    ind <- as.logical(.Call("lfa_threshold", z, 1/(2*n)))
+    #ind  <- (zmax<(1-ploidy/n)) & (zmin>(ploidy/n))
+    ind <- as.logical(.Call("lfa_threshold", z, 1/(ploidy*n)))
     z <- z[ind,]
     z <- log(z/(1-z))
 
