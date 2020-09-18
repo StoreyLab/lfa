@@ -2,7 +2,7 @@
 
 //logistic regression
 //you MUST add the constant before this
-SEXP lreg(SEXP RX, SEXP Ry, SEXP Rmi, SEXP Rtol){
+SEXP lreg_c(SEXP RX, SEXP Ry, SEXP Rmi, SEXP Rtol){
     int *dimX, maxiter = (int)(*REAL(Rmi));
     double *X, *y, tol = (double)(*REAL(Rtol));
     int i, j, k, ind1, ind2, ind;

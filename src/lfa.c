@@ -116,7 +116,7 @@ double mean(double* A, int n, int inc){
     return sum/n;    
 }
 
-SEXP centerscale(SEXP RA){
+SEXP centerscale_c(SEXP RA){
     int *dimA;
     double *A;
     
@@ -145,39 +145,6 @@ SEXP centerscale(SEXP RA){
                 ret[ind] = 0;
                 ind += dimA[0];
             }
-        }
-    }
-    
-    UNPROTECT(2);
-    return Rret;
-}
-
-SEXP center(SEXP RA){
-    int *dimA;
-    double *A;
-    
-    dimA = getDims(RA);
-    if(dimA[0] <= 1) error("er, first dimension is 1? that's weird.");
-    if(dimA[1] <= 1) error("er, second dimension is 1? that's weird.");
-    PROTECT(RA=coerceVector(RA, REALSXP));
-    A = REAL(RA);
-
-    SEXP Rret = PROTECT(duplicate(RA));
-    double *ret = REAL(Rret);
-    
-    int i, j, ind;
-    double m;
-    for(i = 0; i < dimA[0]; i++){
-        ind = i;
-        m = mean(A+i, dimA[1], dimA[0]);
-        
-/*        if( i ==0) {
-            printf("%f %f\n", m, s);
-        }*/
-        
-        for(j = 0; j < dimA[1]; j++){
-            ret[ind] = A[ind] - m;
-            ind += dimA[0];
         }
     }
     

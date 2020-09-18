@@ -1,14 +1,3 @@
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-
-
 #' @title Truncated singular value decomposition
 #'
 #' @description
@@ -24,7 +13,7 @@
 #' \code{dgemv} is a dramatic difference in larger datasets. Since the 
 #' wrapper is technically not a matrix multiplication function, it seemed 
 #' wise to make a copy of the function.
-#' @param A matrix
+#' @param A matrix to decompose
 #' @param d number of singular vectors
 #' @param adjust extra singular vectors to calculate for accuracy
 #' @param tol convergence criterion
@@ -32,37 +21,55 @@
 #' @param seed seed
 #' @param ltrace debugging output
 #' @param override TRUE means we use fast.svd instead of the iterative
+#' @param force If TRUE, forces the Lanczos algorithm to be used on all datasets (usually fast.svd is used on small datasets and other conditions)
 #' algorithm (useful for small data or very high d).
 #' @return list with singular value decomposition.
-trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL, 
- seed=NULL, ltrace = FALSE, override=FALSE) 
-{
-    if (!is.null(seed)) set.seed(seed)
+trunc_svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL, 
+                       seed=NULL, ltrace = FALSE, override=FALSE,
+                       force = FALSE
+                       ) {
+    if ( missing( A ) )
+        stop( 'Input matrix `A` is required!' )
+    if ( missing( d ) )
+        stop( 'Dimension number `d` is required!' )
+    
+    if (!is.null(seed))
+        set.seed(seed)
     maxit <- 1000
     eps <- .Machine$double.eps
     
     m <- nrow(A)
     n <- ncol(A)
-    
-    #uses fast.svd() instead if approximate conditions are satisified
-    if((log10(m)+log10(n)) <= 6 || m < 1000 || n < 100 || override){
-        mysvd <- corpcor::fast.svd(A)
-        return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
-    }
-    if(d > n/20){
-        mysvd <- corpcor::fast.svd(A)
-        return(list(d = mysvd$d[1:d], u = mysvd$u[,1:d], v = mysvd$v[,1:d], iter = 0))
+
+    if ( !force ) {
+        # uses fast.svd() instead if approximate conditions are satisified
+        # this mostly assumes small matrices (memory not an issue anyway)
+        # d > n/20: this could be for large matrices, but large d too (when n is very large, this is unlikely)
+        if((log10(m)+log10(n)) <= 6 || m < 1000 || n < 100 || d > n/20 || override){
+            # this check clarifies problems in toy cases, where m becomes too small after `lfa_threshold`
+            if ( d > min(m, n) )
+                stop("d must be less than min(m,n)")
+            mysvd <- corpcor::fast.svd(A)
+            return(
+                list(
+                    d = mysvd$d[ 1:d ],
+                    u = mysvd$u[ , 1:d, drop = FALSE ],
+                    v = mysvd$v[ , 1:d, drop = FALSE ],
+                    iter = 0
+                )
+            )
+        }
     }
     
     # *adjust* d
-    d_org <- d
+    d_org <- d # remember original value
     d <- d+adjust
     if (m < n)
         stop("expecting tall or sq matrix")
     if (d <= 0) 
         stop("d must be positive")
     if (d > min(m, n)) 
-        stop("d must be less than min(m,n)+adjust")
+        stop("d must be less than min(m,n)-adjust")
     if (tol < 0) 
         stop("tol must be non-negative")
     if (maxit <= 0) 
@@ -91,7 +98,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     G <- matrix(0, n, 1)
     if (is.null(V)) {
         V <- matrix(0, n, m_b)
-        V[, 1] <- rnorm(n)
+        V[, 1] <- stats::rnorm(n)
     }
     else {
         V <- cbind(V, matrix(0, n, m_b - ncol(V)))
@@ -107,27 +114,6 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     Smin <- NULL
     SVTol <- min(sqrt(eps), tol)
 
-    norm <- function(x) return(as.numeric(sqrt(crossprod(x))))
-
-    orthog <- function(Y, X) {
-        return(Y - X %*% crossprod(X,Y))
-    }
-
-    convtests <- function(Bsz, tol, d_org, U_B, S_B, V_B, residuals, 
-        d, SVTol, Smax) {
-        Len_res <- sum(residuals[1:d_org] < tol * Smax)
-        if (Len_res == d_org) {
-            return(list(converged = TRUE, U_B = U_B[, 1:d_org, 
-                drop = FALSE], S_B = S_B[1:d_org, drop = FALSE], 
-                V_B = V_B[, 1:d_org, drop = FALSE], d = d))
-        }
-        Len_res <- sum(residuals[1:d_org] < SVTol * Smax)
-        d <- max(d, d_org+Len_res)
-        if (d > Bsz - 3) 
-            d <- Bsz - 3
-        return(list(converged = FALSE, d = d))
-    }
-
     while (iter <= maxit) {
         j <- 1
         #normalize starting vector
@@ -135,23 +121,23 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
             V[, 1] <- V[, 1, drop = FALSE]/norm(V[, 1, drop = FALSE])
         else j <- d+1
         
-        #compute W=AV using mv
-        W[,j] <- as.matrix(.Call("mv", A, V[,j,drop=FALSE]))
+        # compute W=AV using mv
+        W[,j] <- as.matrix(.Call("mv_c", A, V[,j,drop=FALSE]))
         
         #orthogonalize W
         if (iter != 1) {
             W[, j] <- orthog(W[, j, drop = FALSE], W[, 1:j - 
-                1, drop = FALSE])
+                                                       1, drop = FALSE])
         }
         
         #normalize W and check for dependent vectors
         S <- norm(W[, j, drop = FALSE]) #L_2 norm
         if ((S < SVTol) && (j == 1)) 
-            stop("error: starting vector near the null space")
+            stop("starting vector near the null space")
         if (S < SVTol) { #check if enters??
-            W[, j] <- rnorm(nrow(W))
+            W[, j] <- stats::rnorm(nrow(W))
             W[, j] <- orthog(W[, j, drop = FALSE], W[, 1:j - 
-                1, drop = FALSE])
+                                                       1, drop = FALSE])
             W[, j] <- W[, j, drop = FALSE]/norm(W[, j, drop = FALSE])
             S <- 0
         }
@@ -159,7 +145,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
         
         #lanczos steps
         while (j <= m_b) {
-            G <- as.matrix(.Call("tmv", A, W[,j,drop=FALSE]))
+            G <- as.matrix(.Call("tmv_c", A, W[,j,drop=FALSE]))
 
             G <- G - S * V[, j, drop = FALSE]
             
@@ -171,7 +157,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
                 R <- norm(G)
                 #check for dependence
                 if (R <= SVTol) {
-                    G <- matrix(rnorm(nrow(V)),nrow(V),1)
+                    G <- matrix(stats::rnorm(nrow(V)),nrow(V),1)
                     G <- orthog(G, V[, 1:j, drop = FALSE])
                     V[, j+1] <- G/norm(G)
                     R <- 0
@@ -182,7 +168,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
                 if (is.null(B)) B <- cbind(S, R)
                 else B <- rbind(cbind(B, 0), c(rep(0, j-1), S, R))
 
-                W[,j+1] <- as.matrix(.Call("mv", A, V[,j+1,drop = FALSE]))
+                W[,j+1] <- as.matrix(.Call("mv_c", A, V[,j+1,drop = FALSE]))
                 
                 #reorthog
                 W[, j+1] <- W[, j+1, drop = FALSE] - W[, j, drop = FALSE] * R
@@ -193,7 +179,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
                 S <- norm(W[, j+1, drop = FALSE])
 
                 if (S <= SVTol) {
-                    W[, j+1] <- rnorm(nrow(W))
+                    W[, j+1] <- stats::rnorm(nrow(W))
                     W[, j+1] <- orthog(W[, j+1, drop = FALSE], W[, 1:j, drop = FALSE])
                     W[, j+1] <- W[, j+1, drop = FALSE]/norm(W[, j+1, drop = FALSE])
                     S <- 0
@@ -230,7 +216,7 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
         
         #check for convergence
         ct <- convtests(Bsz, tol, d_org, Bsvd$u, Bsvd$d, Bsvd$v, 
-            abs(R), d, SVTol, Smax)
+                        abs(R), d, SVTol, Smax)
         d <- ct$d
         
         #break criterion
@@ -250,18 +236,15 @@ trunc.svd <- function (A, d, adjust = 3, tol = 1e-10, V = NULL,
     }
     d <- Bsvd$d[1:d_org]
     u <- W[, 1:(dim(Bsvd$u)[1]), drop = FALSE] %*% Bsvd$u[, 1:d_org, 
-        drop = FALSE]
+                                                          drop = FALSE]
     v <- V[, 1:(dim(Bsvd$v)[1]), drop = FALSE] %*% Bsvd$v[, 1:d_org, 
-        drop = FALSE]
+                                                          drop = FALSE]
     return(list(d = d, u = u, v = v, iter = iter))
 }
 
-mv <- function(A, B, transpose=FALSE){
-    if(!transpose){
-        as.matrix(.Call("mv",  A, B))
-    } else if(transpose){
-        as.matrix(.Call("tmv", A, B))
-    }
-}
+norm <- function(x)
+    return( sqrt( drop( crossprod( x ) ) ) )
 
+orthog <- function(Y, X)
+    return( Y - X %*% crossprod( X, Y ) )
 

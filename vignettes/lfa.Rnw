@@ -14,8 +14,8 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{bm}
-\usepackage{bbm}
-\usepackage{enumerate}
+%\usepackage{bbm}
+%\usepackage{enumerate}
 \usepackage[font=small,format=plain,labelfont=bf,up,textfont=up]{caption}
 \usepackage{hyperref}
 \usepackage{subfig}

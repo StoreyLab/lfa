@@ -11,8 +11,7 @@
 
 SEXP lfa_threshold(SEXP, SEXP);
 SEXP lfa_scaling(SEXP, SEXP);
-SEXP centerscale(SEXP);
-SEXP center(SEXP);
-SEXP lreg(SEXP, SEXP, SEXP, SEXP);
-SEXP mv(SEXP, SEXP);
-SEXP tmv(SEXP, SEXP);
+SEXP centerscale_c(SEXP);
+SEXP lreg_c(SEXP, SEXP, SEXP, SEXP);
+SEXP mv_c(SEXP, SEXP);
+SEXP tmv_c(SEXP, SEXP);
