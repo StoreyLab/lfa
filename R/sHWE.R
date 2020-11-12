@@ -32,13 +32,51 @@ sHWE <- function(X, LF, B){
         stop( '`LF` matrix is required!' )
     if ( missing( B ) )
         stop( '`B` scalar is required!' )
-        
-    obs_stat <- apply(X, 1, gof_stat_snp, LF)
-    d <- ncol(LF)
-    AF <- af(X,LF)
-    rm(X)
 
-    stat0 <- compute_nulls(AF, d, B)
+    # check class
+    is_BEDMatrix <- FALSE
+    if ( "BEDMatrix" %in% class(X) ) {
+        is_BEDMatrix <- TRUE
+    } else if ( !is.matrix( X ) )
+        stop( '`X` must be a matrix!' )
+
+    # get dimensions
+    if ( is_BEDMatrix ) {
+        m <- ncol(X)
+        n <- nrow(X)
+    } else {
+        n <- ncol(X)
+        m <- nrow(X)
+    }
+
+    # dimensions should agree
+    if ( n != nrow(LF) )
+        stop( 'Number of individuals in `X` must equal number of individuals (rows) in `LF`' )
+    
+    if (! is_BEDMatrix ) {
+        # usual R object behavior
+        obs_stat <- apply(X, 1, gof_stat_snp, LF)
+    } else {
+        # BEDMatrix case
+        # write an explicit loop around the genotype matrix
+        # questions: is it better to write a simple loop (one locus at the time) or to read big chunks (1000 loci at the time)?  Since `af_snp` is the bottleneck, maybe the difference is small
+        
+        # output vector
+        obs_stat <- vector( 'numeric', m )
+        for ( i in 1 : m ) {
+            # get locus i genotype vector
+            xi <- X[ , i ]
+            # calculate and store result
+            obs_stat[ i ] <- gof_stat_snp( xi, LF )
+        }
+    }
+    
+    d <- ncol(LF)
+    # this already works on BEDMatrix, but produces this large matrix!
+    P <- af(X, LF)
+    rm(X)
+    
+    stat0 <- compute_nulls(P, d, B)
 
     # NOTE: values in either obs_stat and stat0 can be NA
     # the observed cases must be kept
@@ -51,7 +89,6 @@ sHWE <- function(X, LF, B){
     # also, sorting this way removes NAs (it's perfect for null stats)
     stat0 <- sort(as.vector(stat0))
 
-    m <- length(obs_stat)
     p <- rep(NA, m) # initialize to NAs, to preserve obs_stat NAs
     B0 <- length(stat0)
     i1 <- 1 # index on p and obs_stat

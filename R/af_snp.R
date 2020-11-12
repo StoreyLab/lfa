@@ -13,7 +13,7 @@ af_snp <- function(snp, LF){
 
     # dimensions should agree
     if ( length(snp) != nrow(LF) )
-        stop( 'Number of individuals in `snp`' )
+        stop( 'Number of individuals in `snp` must equal number of individuals (rows) in `LF`' )
     
     # can only regress with non-NA individuals
     indexes_keep <- !is.na(snp)

@@ -48,6 +48,7 @@ Overall, added unit testing to all functions, which resulted in the identificati
 
 # 2020-11-12 - lfa 2.0.2.9000
 
-- More functions updated to support BEDMatrix inputs for the genotype matrix `X`.
+- More functions updated to support BEDMatrix inputs for the genotype matrix `X`.  Although BEDMatrix is supported, in these cases there are minimal memory reduction advantages as outputs or intermediate matrices are necessarily as large as the input genotype data.
   - Function `af`.  Although there is memory saving by not loading `X` entirely into memory, the output individual-specific allele frequency matrix `P` has the same dimensions so memory usage may still be excessive for in large datasets, negating the BEDMatrix advantage.
   - Function `pfa_af`.  Note same memory usage issue as `af`.
+  - Function `sHWE`.  A worse memory problem is present, since internal code calculates the entire individual-specific allele frequency matrix `P`, then simulates `B` random genotype matrices of the same dimensions as input (each in memory) from which `LF` and ultimately HWE statistics are obtained.

@@ -234,6 +234,11 @@ test_that( "af works", {
     expect_error( af( ) )
     expect_error( af( X = X ) )
     expect_error( af( LF = LFs ) )
+    # expected error if X is not a matrix
+    expect_error( af( X = as.numeric(X), LF = LFs ) )
+    # expect errors for mismatched dimensions
+    # here number of individuals disagrees
+    expect_error( af( X = X, LF = LFs[ 2:n_ind, ] ) )
     
     # begin test!
     expect_silent(
@@ -386,7 +391,7 @@ test_that( "compute_nulls works", {
     P <- af( X = X, LF = LFs )
     # now test begins
     expect_silent(
-        stat0 <- compute_nulls(AF = P, d = d, B = B)
+        stat0 <- compute_nulls(P = P, d = d, B = B)
     )
     # test return value
     expect_true( is.matrix( stat0 ) )
@@ -409,7 +414,12 @@ test_that( "sHWE works", {
     expect_error( sHWE( LF = LFs, B = B ) )
     expect_error( sHWE( X = X, B = B ) )
     expect_error( sHWE( X = X, LF = LFs ) )
-
+    # expected error if X is not a matrix
+    expect_error( sHWE( X = as.numeric(X), LF = LFs, B = B ) )
+    # expect errors for mismatched dimensions
+    # here number of individuals disagrees
+    expect_error( sHWE( X = X, LF = LFs[ 2:n_ind, ], B = B ) )
+    
     # now a successful run
     expect_silent(
         pvals <- sHWE( X = X, LF = LFs, B = B )
@@ -539,6 +549,28 @@ if (
         }
     })
 
+    test_that( "sHWE works with BEDMatrix", {
+        # get LFs from the full data
+        d <- 3
+        LFs <- lfa( X = X, d = d )
+        # just use default suggestion
+        B <- 1
+
+        # get ordinary output
+        set.seed( 1 )
+        pvals_basic <- sHWE( X = X, LF = LFs, B = B )
+        
+        # get BEDMatrix version
+        set.seed( 1 ) # reset seed first, so random draws are reproduced
+        expect_silent(
+            pvals_BM <- sHWE( X = X_BEDMatrix, LF = LFs, B = B )
+        )
+        expect_equal( pvals_basic, pvals_BM )
+
+        # let randomness happen again
+        set.seed( NULL )
+    })
+    
     # delete temporary data when done
     genio::delete_files_plink( file_bed )
 }

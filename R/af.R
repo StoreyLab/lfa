@@ -27,6 +27,19 @@ af <- function( X, LF, safety = FALSE ){
     } else if ( !is.matrix( X ) )
         stop( '`X` must be a matrix!' )
 
+    # get dimensions
+    if ( is_BEDMatrix ) {
+        m <- ncol(X)
+        n <- nrow(X)
+    } else {
+        n <- ncol(X)
+        # m not used in this case
+    }
+
+    # dimensions should agree
+    if ( n != nrow(LF) )
+        stop( 'Number of individuals in `X` must equal number of individuals (rows) in `LF`' )
+    
     if (! is_BEDMatrix ) {
         # usual R object behavior
         if (safety)
@@ -39,8 +52,7 @@ af <- function( X, LF, safety = FALSE ){
         # BEDMatrix case
         # write an explicit loop around the genotype matrix
         # questions: is it better to write a simple loop (one locus at the time) or to read big chunks (1000 loci at the time)?  Since `af_snp` is the bottleneck, maybe the difference is small
-        m <- ncol(X)
-        n <- nrow(X)
+        
         # output matrix
         P <- matrix( 0, m, n )
         for ( i in 1 : m ) {
