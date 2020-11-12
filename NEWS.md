@@ -45,3 +45,8 @@ Overall, added unit testing to all functions, which resulted in the identificati
   - This consumes lower memory when the number of loci `m` is very large, so it enables analyis of larger datasets.
   - Algorithm for BEDMatrix case is different: instead of Lanczos truncated SVD, covariance matrices are computed explicitly and truncated eigendecomposition performed.  This means runtime and memory complexity are very different here as the number of individuals `n` gets larger.
   - Added `RSpectra` package dependency (for fast truncated eigendecomposition).
+
+# 2020-11-12 - lfa 2.0.2.9000
+
+- More functions updated to support BEDMatrix inputs for the genotype matrix `X`.
+  - Function `af`.  Although there is memory saving by not loading `X` entirely into memory, the output individual-specific allele frequency matrix `P` has the same dimensions so memory usage may still be excessive for in large datasets.

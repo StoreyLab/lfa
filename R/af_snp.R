@@ -11,6 +11,10 @@ af_snp <- function(snp, LF){
     if ( is.null(LF) )
         stop( "`LF` matrix is required!" )
 
+    # dimensions should agree
+    if ( length(snp) != nrow(LF) )
+        stop( 'Number of individuals in `snp`' )
+    
     # can only regress with non-NA individuals
     indexes_keep <- !is.na(snp)
     # get coefficients from logreg 

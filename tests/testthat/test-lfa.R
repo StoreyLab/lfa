@@ -204,6 +204,9 @@ test_that( "af_snp works", {
     expect_error( af_snp( ) )
     expect_error( af_snp( snp = X[ 1, ] ) )
     expect_error( af_snp( LF = LFs ) )
+    # expect errors for mismatched dimensions
+    # here number of individuals disagrees
+    expect_error( af_snp( snp = X[ 1, ], LF = LFs[ 2:n_ind, ] ) )
     
     # begin test!
     # test a few SNPs in the same data (not all, that'd be overkill)
@@ -472,15 +475,32 @@ if (
     })
 
     test_that( "lfa works with BEDMatrix", {
-        d <- 3
-        expect_silent(
+        # large d doesn't work in toy data (see first `lfa` tests above for notes)
+        for ( d in 1 : (n_ind/2) ) {
+            # essentially the previously-tested version, no need to retest
             LFs <- lfa( X = X, d = d )
-        )
-        expect_silent(
-            LFs2 <- lfa( X = X_BEDMatrix, d = d )
-        )
-        # signs vary randomly, but otherwise should match!
-        expect_equal( abs(LFs), abs(LFs2) )
+            # new version for BEDMatrix
+            expect_silent(
+                LFs2 <- lfa( X = X_BEDMatrix, d = d )
+            )
+            # signs vary randomly, but otherwise should match!
+            expect_equal( abs(LFs), abs(LFs2) )
+        }
+    })
+
+    test_that( "af works with BEDMatrix", {
+        for ( d in 1 : (n_ind/2) ) {
+            # setup data
+            #d <- 3
+            LFs <- lfa( X = X, d = d )
+            # get ordinary `af` output
+            P_basic <- af( X = X, LF = LFs )
+            # get BEDMatrix version
+            expect_silent(
+                P_BM <- af( X = X_BEDMatrix, LF = LFs )
+            )
+            expect_equal( P_basic, P_BM )
+        }
     })
 
     # delete temporary data when done

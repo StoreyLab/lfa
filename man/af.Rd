@@ -9,13 +9,15 @@ af(X, LF, safety = FALSE)
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
 1's, 2's and \code{NA}s.
+BEDMatrix is supported.
 Sparse matrices of class Matrix are not supported (yet).}
 
 \item{LF}{Matrix of logistic factors, with intercept. Pass in the
 return value from \code{lfa}!}
 
 \item{safety}{Optional boolean to bypass checks on the genotype
-matrices, which require a non-trivial amount of computation.}
+matrices, which require a non-trivial amount of computation.
+Ignored if \code{X} is a BEDMatrix object.}
 }
 \value{
 Matrix of individual-specific allele frequencies.
