@@ -121,7 +121,7 @@ SEXP centerscale_c(SEXP RA){
     double *A;
     
     dimA = getDims(RA);
-    if(dimA[0] <= 1) error("er, first dimension is 1? that's weird.");
+    // if(dimA[0] <= 1) error("er, first dimension is 1? that's weird."); // let's allow single locus processing!
     if(dimA[1] <= 1) error("er, second dimension is 1? that's weird.");
     PROTECT(RA=coerceVector(RA, REALSXP));
     A = REAL(RA);

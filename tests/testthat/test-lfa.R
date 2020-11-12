@@ -394,3 +394,95 @@ test_that( "sHWE works", {
     expect_true( min( pvals, na.rm = TRUE ) >= 0 )
 })
 
+### BEDMatrix tests
+
+# require external packages for this...
+
+if (
+    suppressMessages(suppressWarnings(require(BEDMatrix))) &&
+    suppressMessages(suppressWarnings(require(genio)))
+) {
+    context('lfa_BEDMatrix')
+    
+    # write the same data we simulated onto a temporary file
+    file_bed <- tempfile('delete-me-random-test') # output name without extensions!
+    genio::write_plink( file_bed, X )
+
+    # load as a BEDMatrix object
+    X_BEDMatrix <- suppressMessages(suppressWarnings( BEDMatrix( file_bed ) ))
+
+    test_that( "covar_BEDMatrix and covar_logit_BEDMatrix work", {
+        # computes not only covariance structure, but also mean vector
+
+        # first compute data from ordinary R matrix, standard methods
+        covar_direct <- covar_basic( X )
+        X_mean <- rowMeans(X, na.rm = TRUE)
+
+        # now compute from BEDMatrix object!
+        expect_silent(
+            obj <- covar_BEDMatrix(X_BEDMatrix)
+        )
+        # used "equivalent" because attributes differ, doesn't matter
+        expect_equivalent( covar_direct, obj$covar )
+        expect_equal( X_mean, obj$X_mean )
+
+        # get eigendecomposition, make sure it agrees as expected with vanilla SVD
+        # this is a test for whether the last `obj$covar` is scaled correctly or not
+        d <- 3
+        obj2 <- RSpectra::eigs_sym( obj$covar, d )
+        V <- obj2$vectors
+        # ultimate test is to compare to R's vanilla SVD (must agree!)
+        # but have to transform X the same way as is normal
+        Xc <- X - X_mean
+        Xc[ is.na(Xc) ] <- 0
+        obj3 <- svd( Xc, nu = d, nv = d )
+        # sqrt(eigenvalues) should be singular values
+        expect_equal( sqrt(obj2$values), obj3$d[ 1:d ] )
+        # signs differ randomly, just compare absolute values
+        expect_equal( abs(V), abs(obj3$v) )
+        
+        ## # this is a test of recovering U when it's not available
+        ## expect_equal( abs( Xc %*% V %*% diag( 1/sqrt(obj2$values), d )), abs(obj3$u) )
+        
+        ## # construct projected data with proper SVD (truncated)
+        ## Z <- obj3$u %*% diag( obj3$d[ 1:d ], d ) %*% t( obj3$v )
+        ## # match it up with my prediction
+        ## Z2 <- Xc %*% tcrossprod( V )
+        ## expect_equal( Z, Z2 )
+
+        # now test that subsequent step is also as desired
+        expect_silent(
+            covar_Z <- covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V )
+        )
+        expect_silent(
+            covar_Z_basic <- covar_logit_basic( X, V )
+        )
+        expect_equal( covar_Z, covar_Z_basic )
+        
+        # repeat with edge case m_chunk
+        expect_silent(
+            obj <- covar_BEDMatrix(X_BEDMatrix, m_chunk = 1)
+        )
+        expect_equivalent( covar_direct, obj$covar )
+        expect_equal( X_mean, obj$X_mean )
+        expect_silent(
+            covar_Z <- covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V, m_chunk = 1 )
+        )
+        expect_equal( covar_Z, covar_Z_basic )
+    })
+
+    test_that( "lfa works with BEDMatrix", {
+        d <- 3
+        expect_silent(
+            LFs <- lfa( X = X, d = d )
+        )
+        expect_silent(
+            LFs2 <- lfa( X = X_BEDMatrix, d = d )
+        )
+        # signs vary randomly, but otherwise should match!
+        expect_equal( abs(LFs), abs(LFs2) )
+    })
+
+    # delete temporary data when done
+    genio::delete_files_plink( file_bed )
+}

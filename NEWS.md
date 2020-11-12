@@ -38,3 +38,10 @@ Overall, added unit testing to all functions, which resulted in the identificati
     - Removed `src/lfa.so` from version control tracking.
   - Added unit tests for all functions using `testthat`.
   - Updates to C code solely to pass latest `R CMD check` requirements.
+
+# 2020-11-11 - lfa 2.0.1.9000
+
+- Function `lfa` added support for BEDMatrix objects for the genotype matrix `X`.
+  - This consumes lower memory when the number of loci `m` is very large, so it enables analyis of larger datasets.
+  - Algorithm for BEDMatrix case is different: instead of Lanczos truncated SVD, covariance matrices are computed explicitly and truncated eigendecomposition performed.  This means runtime and memory complexity are very different here as the number of individuals `n` gets larger.
+  - Added `RSpectra` package dependency (for fast truncated eigendecomposition).

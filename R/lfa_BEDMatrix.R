@@ -1,0 +1,45 @@
+# internal version of lfa for BEDMatrix data
+# NOTE: d must already be reduced (d-1 from `lfa` input)!
+# to ensure low memory usage, algorithm was changed, so many options don't apply.
+# there is no `adjustments` support
+# since this is called from within the main `lfa`, many checks won't be repeated 
+lfa_BEDMatrix <- function(
+                          X,
+                          d,
+                          ploidy = 2,
+                          m_chunk = 1000 # gave good performance in tests
+                          ) {
+    if ( missing( X ) )
+        stop( 'Genotype matrix `X` is required!' )
+    if ( missing( d ) )
+        stop( 'Dimension number `d` is missing!' )
+    if ( !('BEDMatrix' %in% class(X) ))
+        stop( '`X` must be a BEDMatrix object!' )
+    
+    # data dimensions
+    m <- nrow(X)
+    n <- ncol(X)
+
+    # calculate covariance matrix and loci means
+    obj <- covar_BEDMatrix( X, m_chunk = m_chunk )
+    covar <- obj$covar
+    X_mean <- obj$X_mean
+
+    # get truncated eigendecomposition
+    obj <- RSpectra::eigs_sym( covar, d )
+    V <- obj$vectors
+
+    # calculate covariance matrix for second step (after logit filter/transform)
+    covar <- covar_logit_BEDMatrix( X, X_mean, V )
+    
+    # get truncated eigendecomposition of second level, which yields the logistic factors
+    obj <- RSpectra::eigs_sym( covar, d )
+    V <- obj$vectors
+    
+    # add intercept column last
+    V <- cbind( V, 1 )
+    
+    return( V )
+}
+
+

@@ -1,0 +1,47 @@
+# basic covariance formula for second (logit) SVD of R genotype matrix X
+# to use for sanity checks against the more elaborate covar_logit_BEDMatrix
+covar_logit_basic <- function(
+                              X,
+                              V,
+                              ploidy = 2
+                              ) {
+    if ( missing( X ) )
+        stop( 'Genotype matrix `X` is required!' )
+    if ( missing( V ) )
+        stop( 'Truncated eigenvector matrix `V` is required!' )
+    if ( !is.matrix(X) )
+        stop( '`X` must be a matrix!' )
+
+    # get dimensions
+    n <- ncol(X)
+    
+    # standard mean
+    X_mean <- rowMeans(X, na.rm = TRUE)
+        
+    # center data
+    X <- X - X_mean
+        
+    # set NAs to zero ("impute")
+    if ( anyNA(X) )
+        X[ is.na(X) ] <- 0
+
+    # use first pass eigenvectors V to project data (via P, transformed V, see above)
+    Z <- X %*% tcrossprod( V ) + X_mean
+    Z <- Z / ploidy
+    
+    # apply LFA thhreshold to this subset
+    ind <- as.logical( .Call( "lfa_threshold", Z, 1 / ( ploidy * n ) ) )
+    # subset loci
+    Z <- Z[ ind, , drop = FALSE ]
+    # logit transformation of whole matrix
+    Z <- log( Z / ( 1 - Z ) )
+    
+    # center and scale this reduced matrix
+    Z <- centerscale( Z )
+    
+    # cross product matrix
+    covar <- crossprod( Z )
+    
+    return( covar )
+}
+

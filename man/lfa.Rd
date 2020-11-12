@@ -11,12 +11,14 @@ lfa(
   override = FALSE,
   safety = FALSE,
   ploidy = 2,
-  tol = 1e-13
+  tol = 1e-13,
+  m_chunk = 1000
 )
 }
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
 1's, 2's and \code{NA}s.
+BEDMatrix is supported.
 Sparse matrices of class Matrix are not supported (yet).}
 
 \item{d}{Number of logistic factors, including the intercept}
@@ -24,17 +26,23 @@ Sparse matrices of class Matrix are not supported (yet).}
 \item{adjustments}{A matrix of adjustment variables to hold fixed during estimation.
 Number of rows must equal number of individuals in \code{X}.
 These adjustments take the place of LFs in the output, so the number of columns must not exceed \code{d-2} to allow for the intercept and at least one proper LF to be included.
-When present, these adjustment variables appear in the first columns of the output.}
+When present, these adjustment variables appear in the first columns of the output.
+Not supported when \code{X} is a BEDMatrix object.}
 
 \item{override}{Optional boolean to bypass Lanczos bidiagonalization
-SVD. Usually not advised unless encountering a bug in the SVD code.}
+SVD. Usually not advised unless encountering a bug in the SVD code.
+Ignored if \code{X} is a BEDMatrix object.}
 
 \item{safety}{Optional boolean to bypass checks on the genotype
-matrices, which require a non-trivial amount of computation.}
+matrices, which require a non-trivial amount of computation.
+Ignored if \code{X} is a BEDMatrix object.}
 
 \item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
 
-\item{tol}{Tolerance value passed to \code{trunc_svd}}
+\item{tol}{Tolerance value passed to \code{trunc_svd}
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per chunk (to control memory usage).}
 }
 \value{
 The matrix of logistic factors, with individuals along rows and factors along columns.
