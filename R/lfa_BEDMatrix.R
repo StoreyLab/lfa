@@ -16,10 +16,6 @@ lfa_BEDMatrix <- function(
     if ( !('BEDMatrix' %in% class(X) ))
         stop( '`X` must be a BEDMatrix object!' )
     
-    # data dimensions
-    m <- nrow(X)
-    n <- ncol(X)
-
     # calculate covariance matrix and loci means
     obj <- covar_BEDMatrix( X, m_chunk = m_chunk )
     covar <- obj$covar

@@ -4,17 +4,26 @@
 \alias{pca_af}
 \title{PCA Allele frequencies}
 \usage{
-pca_af(X, d, override = FALSE)
+pca_af(X, d, override = FALSE, ploidy = 2, tol = 1e-13, m_chunk = 1000)
 }
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
 1's, 2's and \code{NA}s.
+BEDMatrix is supported.
 Sparse matrices of class Matrix are not supported (yet).}
 
 \item{d}{Number of logistic factors, including the intercept}
 
 \item{override}{Optional boolean to bypass Lanczos bidiagonalization
-SVD. Usually not advised unless encountering a bug in the SVD code.}
+SVD. Usually not advised unless encountering a bug in the SVD code.
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
+
+\item{tol}{Tolerance value passed to \code{trunc_svd}
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per chunk (to control memory usage).}
 }
 \value{
 Matrix of individual-specific allele frequencies.

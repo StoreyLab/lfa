@@ -247,6 +247,29 @@ test_that( "af works", {
     expect_true( !anyNA( P ) )
 })
 
+test_that( 'af_cap works', {
+    # only one param, mandatory
+    expect_error( af_cap() )
+
+    # proper run
+    # use earlier A matrix, any continuous data should work
+    expect_silent( P <- af_cap( A ) )
+    # test that AFs are as expected
+    expect_true( is.numeric( P ) )
+    expect_true( is.matrix( P ) )
+    expect_equal( nrow( P ), m_loci )
+    expect_equal( ncol( P ), n_ind )
+    expect_true( !anyNA( P ) )
+
+    # test vector version
+    expect_silent( pi <- af_cap( A[ 1, ] ) )
+    # test that AFs are as expected
+    expect_true( is.numeric( pi ) )
+    expect_true( !is.matrix( pi ) )
+    expect_equal( length( pi ), n_ind )
+    expect_true( !anyNA( pi ) )
+})
+
 test_that( "pca_af works", {
     # expect errors when key data is missing
     expect_error( pca_af( ) )
@@ -498,6 +521,19 @@ if (
             # get BEDMatrix version
             expect_silent(
                 P_BM <- af( X = X_BEDMatrix, LF = LFs )
+            )
+            expect_equal( P_basic, P_BM )
+        }
+    })
+
+    test_that( "pca_af works with BEDMatrix", {
+        # in all these cases dimensions are so small only fast.svd version is run, so all d possible values should work
+        for ( d in 1 : n_ind ) {
+            # get ordinary `pca_af` output
+            P_basic <- pca_af( X = X, d = d )
+            # get BEDMatrix version
+            expect_silent(
+                P_BM <- pca_af( X = X_BEDMatrix, d = d )
             )
             expect_equal( P_basic, P_BM )
         }

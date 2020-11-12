@@ -21,7 +21,7 @@ covar_logit_BEDMatrix <- function(
     m <- ncol(X)
 
     # turn eigenvector matrix into a projection matrix
-    P <- tcrossprod( V )
+    P_V <- tcrossprod( V )
     
     # initialize desired matrix and vector
     covar <- matrix( 0, nrow = n, ncol = n )
@@ -67,17 +67,17 @@ covar_logit_BEDMatrix <- function(
         # Z = (X V)_r D_r^(-1) D_r t(V_r)
         # Z = X V_r t(V_r)
         
-        # use first pass eigenvectors V to project data (via P, transformed V, see above)
-        Zi <- Xi %*% P + Xi_mean
+        # use first pass eigenvectors V to project data (via P_V, transformed V, see above)
+        Zi <- Xi %*% P_V + Xi_mean
         Zi <- Zi / ploidy
 
-        # apply LFA thhreshold to this subset
-        ind <- as.logical( .Call( "lfa_threshold", Zi, 1 / ( ploidy * n ) ) )
+        # apply LFA threshold to this subset, will remove some loci
+        indexes_loci_keep <- as.logical( .Call( "lfa_threshold", Zi, 1 / ( ploidy * n ) ) )
         # for small enough chunks, nobody may have passed, just move on to next chunk!
-        if ( !any( ind ) )
+        if ( !any( indexes_loci_keep ) )
             next
         # subset loci
-        Zi <- Zi[ ind, , drop = FALSE ]
+        Zi <- Zi[ indexes_loci_keep, , drop = FALSE ]
         # logit transformation of whole matrix
         Zi <- log( Zi / ( 1 - Zi ) )
 

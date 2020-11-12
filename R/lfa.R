@@ -147,9 +147,9 @@ lfa <- function(
     #
     #zmin <- apply(z, 1, min)
     #zmax <- apply(z, 1, max)
-    #ind  <- (zmax<(1-ploidy/n)) & (zmin>(ploidy/n))
-    ind <- as.logical(.Call("lfa_threshold", z, 1/(ploidy*n)))
-    z <- z[ ind, ]
+    #indexes_loci_keep  <- (zmax<(1-ploidy/n)) & (zmin>(ploidy/n))
+    indexes_loci_keep <- as.logical(.Call("lfa_threshold", z, 1/(ploidy*n)))
+    z <- z[ indexes_loci_keep, ]
     z <- log( z / (1-z) )
 
     norm_z <- centerscale( z )
