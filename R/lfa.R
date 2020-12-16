@@ -16,6 +16,7 @@
 #' These adjustments take the place of LFs in the output, so the number of columns must not exceed `d-2` to allow for the intercept and at least one proper LF to be included.
 #' When present, these adjustment variables appear in the first columns of the output.
 #' Not supported when `X` is a BEDMatrix object.
+#' @param rspectra If `TRUE`, use RSpectra::svds instead of default trunc_svd or corpcor::fast.svd options
 #' @param override Optional boolean to bypass Lanczos bidiagonalization
 #' SVD. Usually not advised unless encountering a bug in the SVD code.
 #' Ignored if `X` is a BEDMatrix object.
@@ -43,6 +44,7 @@ lfa <- function(
                 adjustments = NULL,
                 override = FALSE,
                 safety = FALSE,
+                rspectra = FALSE,
                 ploidy = 2,
                 tol = 1e-13,
                 m_chunk = 1000 # gave good performance in tests
@@ -104,11 +106,13 @@ lfa <- function(
     # check data if asked to do it
     if ( safety )
         check_geno(X)
-    
-    # a mysterious parameter for trunc_svd
-    adjust <- 8
-    if ( n - d < 10 )
-        adjust <- n-d-1
+
+    if (!rspectra) {
+        # a mysterious parameter for trunc_svd
+        adjust <- 8
+        if ( n - d < 10 )
+            adjust <- n-d-1
+    }
     
     # index the missing values
     NA_IND <- is.na(X)
@@ -121,15 +125,19 @@ lfa <- function(
     norm_X[NA_IND] <- 0
 
     # first SVD
-    mysvd <- trunc_svd(
-        norm_X,
-        d = d,
-        adjust = adjust,
-        tol = tol,
-        override = override
-    )
-    
+    if (rspectra) {
+        mysvd <- RSpectra::svds( norm_X, d )
+    } else {
+        mysvd <- trunc_svd(
+            norm_X,
+            d = d,
+            adjust = adjust,
+            tol = tol,
+            override = override
+        )
+    }
     rm(norm_X)
+    
     # for diag, pass dimension so it doesn't make mistakes
     # problem is diag( 5.5 ) returns a matrix with 5 rows/cols, only diag( 5.5, d = 1 ) is as desired
     D <- diag( mysvd$d, nrow = d )
@@ -161,13 +169,17 @@ lfa <- function(
     }
 
     # second SVD yields the logistic factors
-    v <- trunc_svd(
-        norm_z,
-        d = d,
-        adjust = adjust,
-        tol = tol,
-        override = override
-    )$v
+    if (rspectra) {
+        v <- RSpectra::svds( norm_z, d )$v
+    } else {
+        v <- trunc_svd(
+            norm_z,
+            d = d,
+            adjust = adjust,
+            tol = tol,
+            override = override
+        )$v
+    }
     # add intercept column last
     v <- cbind( v, 1 )
     # add adjustment variables first

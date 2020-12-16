@@ -121,6 +121,13 @@ test_that("lfa works", {
         expect_equal( LFs[, d], rep.int(1, n_ind) )
         # nothing should be NA
         expect_true( !anyNA( LFs ) )
+
+        # repeat with RSpectra, should get the same LFs!
+        expect_silent(
+            LFs2 <- lfa( X = X, d = d, rspectra = TRUE )
+        )
+        # ignore sign flips
+        expect_equal( abs(LFs), abs(LFs2) )
     }
 })
 

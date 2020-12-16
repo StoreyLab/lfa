@@ -10,6 +10,7 @@ lfa(
   adjustments = NULL,
   override = FALSE,
   safety = FALSE,
+  rspectra = FALSE,
   ploidy = 2,
   tol = 1e-13,
   m_chunk = 1000
@@ -36,6 +37,8 @@ Ignored if \code{X} is a BEDMatrix object.}
 \item{safety}{Optional boolean to bypass checks on the genotype
 matrices, which require a non-trivial amount of computation.
 Ignored if \code{X} is a BEDMatrix object.}
+
+\item{rspectra}{If \code{TRUE}, use RSpectra::svds instead of default trunc_svd or corpcor::fast.svd options}
 
 \item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
 

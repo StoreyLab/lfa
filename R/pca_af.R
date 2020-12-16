@@ -21,7 +21,7 @@ pca_af <- function(
                    ){
     if ( missing( X ) )
         stop( 'Genotype matrix `X` is required!' )
-    if ( is.null( d ) )
+    if ( missing( d ) )
         stop( "Principal components number `d` is required!" )
     
     # check class

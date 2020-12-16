@@ -8,9 +8,9 @@
 af_snp <- function(snp, LF){
     if ( missing( snp ) )
         stop( '`snp` is required!' )
-    if ( is.null(LF) )
+    if ( missing( LF ) )
         stop( "`LF` matrix is required!" )
-
+    
     # dimensions should agree
     if ( length(snp) != nrow(LF) )
         stop( 'Number of individuals in `snp` must equal number of individuals (rows) in `LF`' )

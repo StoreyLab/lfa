@@ -42,7 +42,7 @@ Overall, added unit testing to all functions, which resulted in the identificati
 # 2020-11-11 - lfa 2.0.1.9000
 
 - Function `lfa` added support for BEDMatrix objects for the genotype matrix `X`.
-  - This consumes lower memory when the number of loci `m` is very large, so it enables analyis of larger datasets.
+  - This consumes lower memory when the number of loci `m` is very large, so it enables analysis of larger datasets.
   - Algorithm for BEDMatrix case is different: instead of Lanczos truncated SVD, covariance matrices are computed explicitly and truncated eigendecomposition performed.  This means runtime and memory complexity are very different here as the number of individuals `n` gets larger.
   - Added `RSpectra` package dependency (for fast truncated eigendecomposition).
 
@@ -52,3 +52,11 @@ Overall, added unit testing to all functions, which resulted in the identificati
   - Function `af`.  Although there is memory saving by not loading `X` entirely into memory, the output individual-specific allele frequency matrix `P` has the same dimensions so memory usage may still be excessive for in large datasets, negating the BEDMatrix advantage.
   - Function `pfa_af`.  Note same memory usage issue as `af`.
   - Function `sHWE`.  A worse memory problem is present, since internal code calculates the entire individual-specific allele frequency matrix `P`, then simulates `B` random genotype matrices of the same dimensions as input (each in memory) from which `LF` and ultimately HWE statistics are obtained.
+
+# 2020-12-26 - lfa 2.0.3.9000
+
+- Fixed an integer overflow error that occurred in `sHWE` (in internal function `compute_nulls`), which only occurred if the number of indviduals times the number of loci exceeded the maximum integer size in R (the value of `.Machine$integer.max`, which is 2,147,483,647 in my 64-bit machine).
+- Function `lfa` added `rspectra` option (`FALSE` by default), as an alternative way of calculating SVD internally (for experimental use only).
+- Function `trunc_svd` is now exported.
+- Minor, user-imperceptible changes in other functions.
+

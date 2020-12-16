@@ -17,7 +17,7 @@
 af <- function( X, LF, safety = FALSE ){
     if ( missing( X ) )
         stop( 'Genotype matrix `X` is required!' )
-    if ( is.null(LF) )
+    if ( missing( LF ) )
         stop( "`LF` matrix is required!" )
     
     # check class

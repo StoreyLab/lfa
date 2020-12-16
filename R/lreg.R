@@ -5,6 +5,12 @@ lreg <- function(x, LF, max_iter = 20, tol = 1e-10){
     if ( is.null(LF) )
         stop( "`LF` matrix is required!" )
 
+    # make sure the data is NA-free
+    # focus on x only, that's a more common issue
+    # ( it'd be wasteful to test LFs repeatedly (for each locus) )
+    if ( anyNA( x ) )
+        stop( 'Genotype vector `x` must not have NA values!' )
+    
     # question: weird doubling of everything, appears to be for modeling dominance effects
     LF <- rbind(LF, LF)
     x1 <- as.numeric( ( x == 1 ) | ( x == 2 ) )
@@ -19,10 +25,15 @@ lreg <- function(x, LF, max_iter = 20, tol = 1e-10){
         # `-1` is because LF already has intercept
         # questions:
         # - is there a second doubling of data here?
-        betas <- stats::glm(
-            cbind(x, 2-x) ~ -1 + LF,
-            family = "binomial"
-        )$coef
+        # suppressWarnings
+        # - because sometimes we get warning "glm.fit: fitted probabilities numerically 0 or 1 occurred"
+        # - occurs on randomly simulated data, nothing particularly problematic, so meh
+        suppressWarnings(
+            betas <- stats::glm(
+                                cbind(x, 2-x) ~ -1 + LF,
+                                family = "binomial"
+                            )$coef
+        )
         names(betas) <- NULL
     }
     return( betas )
