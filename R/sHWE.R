@@ -52,60 +52,19 @@ sHWE <- function(X, LF, B){
     # dimensions should agree
     if ( n != nrow(LF) )
         stop( 'Number of individuals in `X` must equal number of individuals (rows) in `LF`' )
-    
-    if (! is_BEDMatrix ) {
-        # usual R object behavior
-        obs_stat <- apply(X, 1, gof_stat_snp, LF)
-    } else {
-        # BEDMatrix case
-        # write an explicit loop around the genotype matrix
-        # questions: is it better to write a simple loop (one locus at the time) or to read big chunks (1000 loci at the time)?  Since `af_snp` is the bottleneck, maybe the difference is small
-        
-        # output vector
-        obs_stat <- vector( 'numeric', m )
-        for ( i in 1 : m ) {
-            # get locus i genotype vector
-            xi <- X[ , i ]
-            # calculate and store result
-            obs_stat[ i ] <- gof_stat_snp( xi, LF )
-        }
-    }
-    
+
+    # calculate observed stats across matrix
+    stats1 <- gof_stat(X, LF)
+
+    # in order to create null statistics, get P matrix, then simulate data from it
     d <- ncol(LF)
     # this already works on BEDMatrix, but produces this large matrix!
     P <- af(X, LF)
     rm(X)
+    stats0 <- compute_nulls( P, d, B )
+
+    # calculate empirical p-values based on these distributions
+    pvals <- pvals_empir( stats1, stats0 )
     
-    stat0 <- compute_nulls(P, d, B)
-
-    # NOTE: values in either obs_stat and stat0 can be NA
-    # the observed cases must be kept
-
-    # helps us map back to original position after sort below
-    obs_stat_order <- order(obs_stat)
-    # sorted obs_stat has NAs removed
-    obs_stat <- sort(obs_stat)
-    # stat0 was a matrix, but we need it as a vector now (and sorted)
-    # also, sorting this way removes NAs (it's perfect for null stats)
-    stat0 <- sort(as.vector(stat0))
-
-    p <- rep(NA, m) # initialize to NAs, to preserve obs_stat NAs
-    B0 <- length(stat0)
-    i1 <- 1 # index on p and obs_stat
-    i2 <- 1 # index on stat0
-
-    # i1 gets incremented in every iteration (a normal for loop?)
-    # m (stopping value) is for non-NA obserations (obs_stat NA's are never in loop, so in p they stay NAs as desired)
-    while(i1 <= m) {
-        # i2 gets incremented until the null statistic i2 exceeds the observed statistic i1 (both in ascending order)
-        while( ( i2 <= B0 ) & ( obs_stat[i1] >= stat0[i2] ) ) {
-            i2 <- i2 + 1
-        }
-        # the p-value is 1 minus the proportion of null statistics smaller than the observed statistic
-        # obs_stat_order[ i1 ] puts the value in the original position (verified in a toy case)
-        p[ obs_stat_order[ i1 ] ] <- 1 - ( ( i2 - 1 ) / B0 )
-        i1 <- i1 + 1
-    }
-
-    return( p )
+    return( pvals )
 }

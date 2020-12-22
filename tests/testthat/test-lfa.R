@@ -406,6 +406,55 @@ test_that( "compute_nulls works", {
     expect_equal( ncol( stat0 ), B )
 })
 
+test_that( "pvals_empir works", {
+    # generate some small random data with NAs
+    # these don't need the same lenghts, so let's make it funky
+    m0 <- 100 # total null (separate from observed)
+    m <- 40 # total observed
+    m1 <- 10 # observed which are truly alternative
+    # null is N(0,1)
+    stats0 <- rnorm( m0 )
+    # data is also mostly null, but a few alternatives N(1, 1)
+    stats1 <- c( rnorm( m - m1 ), rnorm( m1, mean = 1 ) )
+    # scramble them
+    stats1 <- sample( stats1 )
+    # sprinkle NAs in both
+    stats0[ sample.int( m0, 5 ) ] <- NA
+    stats1[ sample.int( m, 5 ) ] <- NA
+    # compute p-values with naive, brute-force, clear formula
+    pvals <- pvals_empir_brute( stats1, stats0 )
+    
+    # another random dataset with discrete statistics, to make sure ties are handled correctly (are inequalities strict?)
+    # replace Normal with Poisson
+    stats0_discr <- rpois( m0, lambda = 10 )
+    # data is also mostly null, but a few alternatives N(1, 1)
+    stats1_discr <- c( rpois( m - m1, lambda = 10 ), rpois( m1, lambda = 30 ) )
+    # scramble them
+    stats1_discr <- sample( stats1_discr )
+    # sprinkle NAs in both
+    stats0_discr[ sample.int( m0, 5 ) ] <- NA
+    stats1_discr[ sample.int( m, 5 ) ] <- NA
+    # compute p-values with naive, brute-force, clear formula
+    pvals_discr <- pvals_empir_brute( stats1_discr, stats0_discr )
+
+    # cause errors on purpose
+    # all have missing arguments
+    expect_error( pvals_empir( ) )
+    expect_error( pvals_empir( stats1 ) )
+    expect_error( pvals_empir( stats0 = stats0 ) )
+    
+    # first direct test of Normal data
+    expect_equal(
+        pvals,
+        pvals_empir( stats1, stats0 )
+    )
+    # now discrete data
+    expect_equal(
+        pvals_discr,
+        pvals_empir( stats1_discr, stats0_discr )
+    )
+})
+
 test_that( "sHWE works", {
     # get LFs from the full data
     d <- 3
