@@ -14,9 +14,9 @@ Sparse matrices of class Matrix are not supported (yet).}
 
 \item{LF}{matrix of logistic factors}
 
-\item{B}{number of null datasets to generate - \eqn{B=1} is usualy
+\item{B}{number of null datasets to generate, \code{B = 1} is usualy
 sufficient. If computational time/power allows, a few extra
-\eqn{B} could be helpful}
+\code{B} could be helpful}
 }
 \value{
 a vector of p-values for each SNP.
@@ -25,7 +25,7 @@ a vector of p-values for each SNP.
 Compute structural Hardy-Weinberg Equilibrium (sHWE) p-values
 on a SNP-by-SNP basis. These p-values can be aggregated to
 determine genome-wide goodness-of-fit for a particular value
-of \eqn{d}. See \url{https://doi.org/10.1101/240804} for more
+of \code{d}. See \url{https://doi.org/10.1101/240804} for more
 details.
 }
 \examples{

@@ -4,15 +4,14 @@
 #' Truncated SVD
 #'
 #' @details
-#' Performs singular value decomposition but only returns the first 
-#' \code{d} singular vectors/values. The truncated SVD utilizes Lanczos
-#' bidiagonalization. See references.
+#' Performs singular value decomposition but only returns the first `d` singular vectors/values.
+#' The truncated SVD utilizes Lanczos bidiagonalization.
+#' See references.
 #' 
-#' This function was modified from the package irlba 1.0.1 under 
-#' GPL. Replacing the \code{crossprod()} calls with the C wrapper to 
-#' \code{dgemv} is a dramatic difference in larger datasets. Since the 
-#' wrapper is technically not a matrix multiplication function, it seemed 
-#' wise to make a copy of the function.
+#' This function was modified from the package irlba 1.0.1 under GPL.
+#' Replacing the [crossprod()] calls with the C wrapper to `dgemv` is a dramatic difference in larger datasets.
+#' Since the wrapper is technically not a matrix multiplication function, it seemed wise to make a copy of the function.
+#' 
 #' @param A matrix to decompose
 #' @param d number of singular vectors
 #' @param adjust extra singular vectors to calculate for accuracy
@@ -20,9 +19,8 @@
 #' @param V optional initial guess
 #' @param seed seed
 #' @param ltrace debugging output
-#' @param override TRUE means we use fast.svd instead of the iterative
-#' @param force If TRUE, forces the Lanczos algorithm to be used on all datasets (usually fast.svd is used on small datasets and other conditions)
-#' algorithm (useful for small data or very high d).
+#' @param override `TRUE` means we use [corpcor::fast.svd()] instead of the iterative algorithm (useful for small data or very high `d`).
+#' @param force If `TRUE`, forces the Lanczos algorithm to be used on all datasets (usually [corpcor::fast.svd()] is used on small datasets and other conditions)
 #' @return list with singular value decomposition.
 #' @export
 trunc_svd <- function (

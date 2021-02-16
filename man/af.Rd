@@ -12,8 +12,8 @@ af(X, LF, safety = FALSE)
 BEDMatrix is supported.
 Sparse matrices of class Matrix are not supported (yet).}
 
-\item{LF}{Matrix of logistic factors, with intercept. Pass in the
-return value from \code{lfa}!}
+\item{LF}{Matrix of logistic factors, with intercept.
+Pass in the return value from \code{\link[=lfa]{lfa()}}!}
 
 \item{safety}{Optional boolean to bypass checks on the genotype
 matrices, which require a non-trivial amount of computation.
@@ -31,7 +31,7 @@ frequencies, which has the same dimensions of the genotype matrix.
 Be warned that this function could use a ton of memory, as the
 return value is all doubles. It could be wise to pass only a
 selection of the SNPs in your genotype matrix to get an idea for
-memory usage. Use \code{gc} to check memory usage!
+memory usage. Use \code{\link[=gc]{gc()}} to check memory usage!
 }
 \examples{
 LF = lfa(hgdp_subset, 4)

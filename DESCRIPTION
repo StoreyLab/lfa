@@ -1,12 +1,11 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.0.4.9000
+Version: 2.0.5.9000
 Author: Wei Hao, Minsun Song, Alejandro Ochoa, John D. Storey
 Maintainer: Alejandro Ochoa <alejandro.ochoa@duke.edu>, Wei Hao <whao@princeton.edu>, John D. Storey <jstorey@princeton.edu>
 Encoding: UTF-8
 LazyData: true
-Description: LFA is a method for a PCA analogue on Binomial data via estimation
-    of latent structure in the natural parameter.
+Description: LFA is a method for a PCA analogue on Binomial data via estimation of latent structure in the natural parameter.
 Imports:
     corpcor,
     RSpectra

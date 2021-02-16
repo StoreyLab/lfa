@@ -30,19 +30,20 @@ These adjustments take the place of LFs in the output, so the number of columns 
 When present, these adjustment variables appear in the first columns of the output.
 Not supported when \code{X} is a BEDMatrix object.}
 
-\item{override}{Optional boolean to bypass Lanczos bidiagonalization
-SVD. Usually not advised unless encountering a bug in the SVD code.
+\item{override}{Optional boolean passed to \code{\link[=trunc_svd]{trunc_svd()}} to bypass its Lanczos bidiagonalization SVD, instead using \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}.
+Usually not advised unless encountering a bug in the SVD code.
 Ignored if \code{X} is a BEDMatrix object.}
 
 \item{safety}{Optional boolean to bypass checks on the genotype
 matrices, which require a non-trivial amount of computation.
 Ignored if \code{X} is a BEDMatrix object.}
 
-\item{rspectra}{If \code{TRUE}, use RSpectra::svds instead of default trunc_svd or corpcor::fast.svd options}
+\item{rspectra}{If \code{TRUE}, use \code{\link[RSpectra:svds]{RSpectra::svds()}} instead of default \code{\link[=trunc_svd]{trunc_svd()}} or \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} options.
+Ignored if \code{X} is a BEDMatrix object.}
 
 \item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
 
-\item{tol}{Tolerance value passed to \code{trunc_svd}
+\item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
 Ignored if \code{X} is a BEDMatrix object.}
 
 \item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per chunk (to control memory usage).}
@@ -52,11 +53,11 @@ The matrix of logistic factors, with individuals along rows and factors along co
 The intercept appears at the end of the columns, and adjustments in the beginning if present.
 }
 \description{
-Fit a factor model of dimension \eqn{d} for binomial data, returning logistic factors (LFs).
-Note that \eqn{d=1} is intercept only, and for \eqn{d>1} we compute \eqn{d-1} singular vectors and postpend the intercept.
+Fit a factor model of dimension \code{d} for binomial data, returning logistic factors (LFs).
+Note that \code{d = 1} is intercept only, and for \code{d > 1} we compute \code{d - 1} singular vectors and postpend the intercept.
 }
 \details{
-Genotype matrix is expected to be a matrix of integers with values 0, 1, 2, or NA.
+Genotype matrix is expected to be a matrix of integers with values 0, 1, 2, or \code{NA}.
 Note that the coding of the SNPs (which case is 0 vs 2) does not change the output.
 }
 \examples{

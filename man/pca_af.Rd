@@ -14,13 +14,13 @@ Sparse matrices of class Matrix are not supported (yet).}
 
 \item{d}{Number of logistic factors, including the intercept}
 
-\item{override}{Optional boolean to bypass Lanczos bidiagonalization
-SVD. Usually not advised unless encountering a bug in the SVD code.
+\item{override}{Optional boolean passed to \code{\link[=trunc_svd]{trunc_svd()}} to bypass its Lanczos bidiagonalization SVD, instead using \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}.
+Usually not advised unless encountering a bug in the SVD code.
 Ignored if \code{X} is a BEDMatrix object.}
 
 \item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
 
-\item{tol}{Tolerance value passed to \code{trunc_svd}
+\item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
 Ignored if \code{X} is a BEDMatrix object.}
 
 \item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per chunk (to control memory usage).}

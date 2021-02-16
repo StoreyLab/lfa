@@ -1,9 +1,9 @@
 #' Logistic factor analysis
 #'
-#' Fit a factor model of dimension \eqn{d} for binomial data, returning logistic factors (LFs).
-#' Note that \eqn{d=1} is intercept only, and for \eqn{d>1} we compute \eqn{d-1} singular vectors and postpend the intercept.
+#' Fit a factor model of dimension `d` for binomial data, returning logistic factors (LFs).
+#' Note that `d = 1` is intercept only, and for `d > 1` we compute `d - 1` singular vectors and postpend the intercept.
 #'
-#' Genotype matrix is expected to be a matrix of integers with values 0, 1, 2, or NA.
+#' Genotype matrix is expected to be a matrix of integers with values 0, 1, 2, or `NA`.
 #' Note that the coding of the SNPs (which case is 0 vs 2) does not change the output.
 #'
 #' @param X A matrix of SNP genotypes, i.e. an integer matrix of 0's,
@@ -16,15 +16,16 @@
 #' These adjustments take the place of LFs in the output, so the number of columns must not exceed `d-2` to allow for the intercept and at least one proper LF to be included.
 #' When present, these adjustment variables appear in the first columns of the output.
 #' Not supported when `X` is a BEDMatrix object.
-#' @param rspectra If `TRUE`, use RSpectra::svds instead of default trunc_svd or corpcor::fast.svd options
-#' @param override Optional boolean to bypass Lanczos bidiagonalization
-#' SVD. Usually not advised unless encountering a bug in the SVD code.
+#' @param rspectra If `TRUE`, use [RSpectra::svds()] instead of default [trunc_svd()] or [corpcor::fast.svd()] options.
+#' Ignored if `X` is a BEDMatrix object.
+#' @param override Optional boolean passed to [trunc_svd()] to bypass its Lanczos bidiagonalization SVD, instead using [corpcor::fast.svd()].
+#' Usually not advised unless encountering a bug in the SVD code.
 #' Ignored if `X` is a BEDMatrix object.
 #' @param safety Optional boolean to bypass checks on the genotype
 #' matrices, which require a non-trivial amount of computation.
 #' Ignored if `X` is a BEDMatrix object.
 #' @param ploidy Ploidy of data, defaults to 2 for bi-allelic unphased SNPs
-#' @param tol Tolerance value passed to `trunc_svd`
+#' @param tol Tolerance value passed to [trunc_svd()]
 #' Ignored if `X` is a BEDMatrix object.
 #' @param m_chunk If `X` is a BEDMatrix object, number of loci to read per chunk (to control memory usage).
 #' 
@@ -35,7 +36,6 @@
 #' LF <- lfa(hgdp_subset, 4)
 #' dim(LF)
 #' head(LF)
-#' @importFrom corpcor fast.svd
 #' @useDynLib lfa, .registration = TRUE
 #' @export
 lfa <- function(

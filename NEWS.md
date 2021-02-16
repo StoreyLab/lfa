@@ -71,3 +71,9 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
   - Now empirical p-value code is separated into new internal function `pvals_empir`, and its tested against a new naive version `pvals_empir_brute` (slower brute-force algorithm, used to validate outputs only) in unit tests including simulated data with `NA` values.
   - Also refactored other internal `sHWE` code into a new internal function `gof_stat`, which by itself better handles BEDMatrix files (though overall memory savings are not yet there on the broader `sHWE`).
 - Spell-checked this news file (edited earlier entries).
+
+# 2021-02-16 - lfa 2.0.5.9000
+
+* Documentation updates:
+  - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).
+

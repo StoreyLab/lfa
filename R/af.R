@@ -1,14 +1,14 @@
 #' @title Allele frequencies
 #' @description Compute matrix of individual-specific allele frequencies
 #' @inheritParams lfa
-#' @param LF Matrix of logistic factors, with intercept. Pass in the 
-#' return value from \code{lfa}!
+#' @param LF Matrix of logistic factors, with intercept.
+#' Pass in the return value from [lfa()]!
 #' @details Computes the matrix of individual-specific allele 
 #' frequencies, which has the same dimensions of the genotype matrix.
 #' Be warned that this function could use a ton of memory, as the 
 #' return value is all doubles. It could be wise to pass only a 
 #' selection of the SNPs in your genotype matrix to get an idea for
-#' memory usage. Use \code{gc} to check memory usage!
+#' memory usage. Use [gc()] to check memory usage!
 #' @examples
 #' LF = lfa(hgdp_subset, 4)
 #' allele_freqs = af(hgdp_subset, LF)

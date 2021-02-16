@@ -9,8 +9,8 @@ af_snp(snp, LF)
 \arguments{
 \item{snp}{vector of 0's, 1's, and 2's}
 
-\item{LF}{Matrix of logistic factors, with intercept. Pass in the
-return value from \code{lfa}!}
+\item{LF}{Matrix of logistic factors, with intercept.
+Pass in the return value from \code{\link[=lfa]{lfa()}}!}
 }
 \value{
 vector of allele frequencies

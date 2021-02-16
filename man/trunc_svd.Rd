@@ -31,10 +31,9 @@ trunc_svd(
 
 \item{ltrace}{debugging output}
 
-\item{override}{TRUE means we use fast.svd instead of the iterative}
+\item{override}{\code{TRUE} means we use \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} instead of the iterative algorithm (useful for small data or very high \code{d}).}
 
-\item{force}{If TRUE, forces the Lanczos algorithm to be used on all datasets (usually fast.svd is used on small datasets and other conditions)
-algorithm (useful for small data or very high d).}
+\item{force}{If \code{TRUE}, forces the Lanczos algorithm to be used on all datasets (usually \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} is used on small datasets and other conditions)}
 }
 \value{
 list with singular value decomposition.
@@ -43,13 +42,11 @@ list with singular value decomposition.
 Truncated SVD
 }
 \details{
-Performs singular value decomposition but only returns the first
-\code{d} singular vectors/values. The truncated SVD utilizes Lanczos
-bidiagonalization. See references.
+Performs singular value decomposition but only returns the first \code{d} singular vectors/values.
+The truncated SVD utilizes Lanczos bidiagonalization.
+See references.
 
-This function was modified from the package irlba 1.0.1 under
-GPL. Replacing the \code{crossprod()} calls with the C wrapper to
-\code{dgemv} is a dramatic difference in larger datasets. Since the
-wrapper is technically not a matrix multiplication function, it seemed
-wise to make a copy of the function.
+This function was modified from the package irlba 1.0.1 under GPL.
+Replacing the \code{\link[=crossprod]{crossprod()}} calls with the C wrapper to \code{dgemv} is a dramatic difference in larger datasets.
+Since the wrapper is technically not a matrix multiplication function, it seemed wise to make a copy of the function.
 }
