@@ -77,3 +77,8 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
 * Documentation updates:
   - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).
 
+# 2021-03-01 - lfa 2.0.6.9000
+
+* Functions `af_snp`, `af`, and `sHWE` added parameters `max_iter` (default 100) and `tol` (default 1e-10).
+  - Previous version of code had these parameters hardcoded.
+  - NOTE: `max_iter = 20` used to be the default value, which in downstream tests was not routinely sufficient to converge with comparable numerical accuracy to `glm` fits (not in this package `lfa`, but in downstream packages `gcatest` and `jackstraw`, which require calculating deviances).

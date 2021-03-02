@@ -1,4 +1,4 @@
-compute_nulls <- function(P, d, B) {
+compute_nulls <- function( P, d, B, max_iter = 100, tol = 1e-10 ) {
     m <- nrow( P )
     n <- ncol( P )
     
@@ -15,7 +15,7 @@ compute_nulls <- function(P, d, B) {
         )
         LF0 <- lfa( X0, d )
         # this calculates stats correctly, even when X0 is BEDMatrix!
-        stats0[ , i ] <- gof_stat( X0, LF0 )
+        stats0[ , i ] <- gof_stat( X0, LF0, max_iter = max_iter, tol = tol )
     }
 
     return( stats0 )

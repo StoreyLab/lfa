@@ -3,6 +3,8 @@
 #' @inheritParams lfa
 #' @param LF Matrix of logistic factors, with intercept.
 #' Pass in the return value from [lfa()]!
+#' @param max_iter Maximum number of iterations for logistic regression
+#' @param tol Numerical tolerance for convergence of logistic regression
 #' @details Computes the matrix of individual-specific allele 
 #' frequencies, which has the same dimensions of the genotype matrix.
 #' Be warned that this function could use a ton of memory, as the 
@@ -14,7 +16,7 @@
 #' allele_freqs = af(hgdp_subset, LF)
 #' @return Matrix of individual-specific allele frequencies.
 #' @export
-af <- function( X, LF, safety = FALSE ){
+af <- function( X, LF, safety = FALSE, max_iter = 100, tol = 1e-10 ){
     if ( missing( X ) )
         stop( 'Genotype matrix `X` is required!' )
     if ( missing( LF ) )
@@ -46,7 +48,7 @@ af <- function( X, LF, safety = FALSE ){
             check_geno(X)
         
         return(
-            t( apply( X, 1, af_snp, LF ) )
+            t( apply( X, 1, af_snp, LF, max_iter = max_iter, tol = tol ) )
         )
     } else {
         # BEDMatrix case
@@ -59,7 +61,7 @@ af <- function( X, LF, safety = FALSE ){
             # get locus i genotype vector
             xi <- X[ , i ]
             # calculate and store result
-            P[ i, ] <- af_snp( xi, LF )
+            P[ i, ] <- af_snp( xi, LF, max_iter = max_iter, tol = tol )
         }
         # done!
         return( P )

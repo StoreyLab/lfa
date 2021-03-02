@@ -1,11 +1,11 @@
-gof_stat_snp <- function(snp, LF){
+gof_stat_snp <- function( snp, LF, max_iter = 100, tol = 1e-10 ){
     # remove NAs before calculating GOF statistics
     NA_IND <- is.na(snp)
     snp <- snp[!is.na(snp)]
     LF  <- LF[!NA_IND, ,drop=FALSE]
 
     # get vector of allele frequencies at this SNP
-    p <- af_snp(snp, LF)
+    p <- af_snp( snp, LF, max_iter = max_iter, tol = tol )
 
     p0 <- (1-p)^2
     p1 <- 2*p*(1-p)

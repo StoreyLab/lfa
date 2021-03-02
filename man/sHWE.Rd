@@ -4,7 +4,7 @@
 \alias{sHWE}
 \title{Hardy-Weinberg Equilibrium in structure populations}
 \usage{
-sHWE(X, LF, B)
+sHWE(X, LF, B, max_iter = 100, tol = 1e-10)
 }
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
@@ -17,6 +17,11 @@ Sparse matrices of class Matrix are not supported (yet).}
 \item{B}{number of null datasets to generate, \code{B = 1} is usualy
 sufficient. If computational time/power allows, a few extra
 \code{B} could be helpful}
+
+\item{max_iter}{Maximum number of iterations for logistic regression}
+
+\item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
+Ignored if \code{X} is a BEDMatrix object.}
 }
 \value{
 a vector of p-values for each SNP.

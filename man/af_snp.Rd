@@ -4,13 +4,17 @@
 \alias{af_snp}
 \title{Allele frequencies for SNP}
 \usage{
-af_snp(snp, LF)
+af_snp(snp, LF, max_iter = 100, tol = 1e-10)
 }
 \arguments{
 \item{snp}{vector of 0's, 1's, and 2's}
 
 \item{LF}{Matrix of logistic factors, with intercept.
 Pass in the return value from \code{\link[=lfa]{lfa()}}!}
+
+\item{max_iter}{Maximum number of iterations for logistic regression}
+
+\item{tol}{Numerical tolerance for convergence of logistic regression}
 }
 \value{
 vector of allele frequencies

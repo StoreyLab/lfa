@@ -4,7 +4,7 @@
 \alias{af}
 \title{Allele frequencies}
 \usage{
-af(X, LF, safety = FALSE)
+af(X, LF, safety = FALSE, max_iter = 100, tol = 1e-10)
 }
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
@@ -18,6 +18,10 @@ Pass in the return value from \code{\link[=lfa]{lfa()}}!}
 \item{safety}{Optional boolean to bypass checks on the genotype
 matrices, which require a non-trivial amount of computation.
 Ignored if \code{X} is a BEDMatrix object.}
+
+\item{max_iter}{Maximum number of iterations for logistic regression}
+
+\item{tol}{Numerical tolerance for convergence of logistic regression}
 }
 \value{
 Matrix of individual-specific allele frequencies.

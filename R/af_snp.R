@@ -5,7 +5,7 @@
 #' @param snp vector of 0's, 1's, and 2's
 #' @return vector of allele frequencies
 #' @export
-af_snp <- function(snp, LF){
+af_snp <- function(snp, LF, max_iter = 100, tol = 1e-10){
     if ( missing( snp ) )
         stop( '`snp` is required!' )
     if ( missing( LF ) )
@@ -20,7 +20,9 @@ af_snp <- function(snp, LF){
     # get coefficients from logreg 
     betas <- lreg(
         snp[ indexes_keep ],
-        LF[ indexes_keep, , drop = FALSE ]
+        LF[ indexes_keep, , drop = FALSE ],
+        max_iter = max_iter,
+        tol = tol
     )
 
     # get allele frequencies for all individuals

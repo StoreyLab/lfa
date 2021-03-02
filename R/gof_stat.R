@@ -1,4 +1,4 @@
-gof_stat <- function(X, LF) {
+gof_stat <- function( X, LF, max_iter = 100, tol = 1e-10 ) {
     # wrapper around gof_stat_snp, applying it correcto across matrix whether input is a regular R matrix or a BEDMatrix object
 
     if ( missing( X ) )
@@ -28,7 +28,7 @@ gof_stat <- function(X, LF) {
     
     if (! is_BEDMatrix ) {
         # usual R object behavior
-        gof_stats <- apply(X, 1, gof_stat_snp, LF)
+        gof_stats <- apply( X, 1, gof_stat_snp, LF, max_iter = max_iter, tol = tol )
     } else {
         # BEDMatrix case
         # write an explicit loop around the genotype matrix
@@ -40,7 +40,7 @@ gof_stat <- function(X, LF) {
             # get locus i genotype vector
             xi <- X[ , i ]
             # calculate and store result
-            gof_stats[ i ] <- gof_stat_snp( xi, LF )
+            gof_stats[ i ] <- gof_stat_snp( xi, LF, max_iter = max_iter, tol = tol )
         }
     }
     return( gof_stats )
