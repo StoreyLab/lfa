@@ -1,4 +1,4 @@
-# 2020-09-18 - lfa 2.0.0.9000
+# lfa 2.0.0.9000 (2020-09-18)
 
 Major overhaul from last version (1.9.0, last updated 2018-02-11).
 Overall, added unit testing to all functions, which resulted in the identification and fixing of several edge-case bugs, and also minor improvements.
@@ -7,7 +7,7 @@ Overall, added unit testing to all functions, which resulted in the identificati
   - Removed redundant/obsolete exported functions:
     - `model.gof`: entirely redundant with `sHWE` in this same package
     - `read.tped.recode`: obsolete file format; instead, use `plink` for file conversions!
-    - `read.bed`: instead, use `read_bed` from the `genio` package!
+    - `read.bed`: instead, use `read_plink` from the `genio` package!
 	- `center`: only worked for matrices without missingness (useless for real data), no dependencies in code, plus centering is trivial in R
   - Renamed remaining functions, replacing periods with underscores.
     - Only specific change: `trunc.svd` -> `trunc_svd`
@@ -39,28 +39,28 @@ Overall, added unit testing to all functions, which resulted in the identificati
   - Added unit tests for all functions using `testthat`.
   - Updates to C code solely to pass latest `R CMD check` requirements.
 
-# 2020-11-11 - lfa 2.0.1.9000
+# lfa 2.0.1.9000 (2020-11-11)
 
 - Function `lfa` added support for BEDMatrix objects for the genotype matrix `X`.
   - This consumes lower memory when the number of loci `m` is very large, so it enables analysis of larger datasets.
   - Algorithm for BEDMatrix case is different: instead of Lanczos truncated SVD, covariance matrices are computed explicitly and truncated eigendecomposition performed.  This means runtime and memory complexity are very different here as the number of individuals `n` gets larger.
   - Added `RSpectra` package dependency (for fast truncated eigendecomposition).
 
-# 2020-11-12 - lfa 2.0.2.9000
+# lfa 2.0.2.9000 (2020-11-12)
 
 - More functions updated to support BEDMatrix inputs for the genotype matrix `X`.  Although BEDMatrix is supported, in these cases there are minimal memory reduction advantages as outputs or intermediate matrices are necessarily as large as the input genotype data.
   - Function `af`.  Although there is memory saving by not loading `X` entirely into memory, the output individual-specific allele frequency matrix `P` has the same dimensions so memory usage may still be excessive for in large datasets, negating the BEDMatrix advantage.
   - Function `pca_af`.  Note same memory usage issue as `af`.
   - Function `sHWE`.  A worse memory problem is present, since internal code calculates the entire individual-specific allele frequency matrix `P`, then simulates `B` random genotype matrices of the same dimensions as input (each in memory) from which `LF` and ultimately HWE statistics are obtained.
 
-# 2020-12-16 - lfa 2.0.3.9000
+# lfa 2.0.3.9000 (2020-12-16)
 
 - Fixed an integer overflow error that occurred in `sHWE` (in internal function `compute_nulls`), which only occurred if the number of individuals times the number of loci exceeded the maximum integer size in R (the value of `.Machine$integer.max`, which is 2,147,483,647 in my 64-bit machine).
 - Function `lfa` added `rspectra` option (`FALSE` by default), as an alternative way of calculating SVD internally (for experimental use only).
 - Function `trunc_svd` is now exported.
 - Minor, user-imperceptible changes in other functions.
 
-# 2020-12-22 - lfa 2.0.4.9000
+# lfa 2.0.4.9000 (2020-12-22)
 
 - Function `sHWE` fixed bug: an error could occur when internal statistics vector included `NA` values.
   - Original error gave this obscure message, which occurred because an index went out of bounds due to a discrepancy in vector lengths due to the presence of `NA` values:
@@ -72,13 +72,47 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
   - Also refactored other internal `sHWE` code into a new internal function `gof_stat`, which by itself better handles BEDMatrix files (though overall memory savings are not yet there on the broader `sHWE`).
 - Spell-checked this news file (edited earlier entries).
 
-# 2021-02-16 - lfa 2.0.5.9000
+# lfa 2.0.5.9000 (2021-02-16)
 
 * Documentation updates:
   - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).
 
-# 2021-03-01 - lfa 2.0.6.9000
+# lfa 2.0.6.9000 (2021-03-01)
 
 * Functions `af_snp`, `af`, and `sHWE` added parameters `max_iter` (default 100) and `tol` (default 1e-10).
   - Previous version of code had these parameters hardcoded.
   - NOTE: `max_iter = 20` used to be the default value, which in downstream tests was not routinely sufficient to converge with comparable numerical accuracy to `glm` fits (not in this package `lfa`, but in downstream packages `gcatest` and `jackstraw`, which require calculating deviances).
+
+# lfa 2.0.7 (2021-06-16)
+
+* Lots of minor changes for Bioconductor update.
+  - Function `trunc_svd`:
+    - Removed `seed`, `ltrace`, and `V` options.
+    - Added `maxit` option.
+	- Reduced default `tol` from 1e-10 to `.Machine$double.eps` (about 2e-16)
+  - Function `lfa`:
+	- Reduced default `tol` from 1e-13 to `.Machine$double.eps` (about 2e-16)
+  - Added more examples in function docs.
+  - DESCRIPTION:
+    - Updated to `Authors@R`.
+    - Lengthened "Description" paragraph.
+    - Increased R dependency from 3.2 to 4.0.
+  - Updated `README.md`.
+  - Reformatted this `NEWS.md` slighly to improve its automatic parsing.
+  - Added published paper citation to vignette, `README.md`, `inst/CITATION`.
+    - First two used to point to arXiv preprint, last one didn't exist.
+  - Updated vignette to reflect that `read.bed` has been removed.
+  - Corrected spelling.
+  - Resurrected and deprecated functions that were exported in last Bioconductor release but deleted on GitHub:
+    - `center`
+	- `model.gof`
+	- `read.bed`
+	- `read.tped.recode`
+  - Internal changes:
+    - All unexported functions are now prefixed with a period.
+    - Replaced `1:x` with `seq_len(x)` several functions.
+    - Reformatted all code with package `reformatR` and otherwise match Bioconductor guidelines.
+    - Split some functions up so individual functions have less than 50 lines.
+    - Removed unexported function `inverse_2x2`, probably speeding up `sHWE` slightly.
+	- Removed unexported function `mv` (all instances called C code directly instead of this R wrapper).
+    - Cleaned up `trunc_svd` source considerably.

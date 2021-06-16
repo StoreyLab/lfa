@@ -92,6 +92,21 @@ test_that( "trunc_svd works, matches base::svd", {
             ## expect_equal( obj$v, sgn[ 1 : n_ind ] * obj2$v )
         }
     }
+
+    # run on HGDP data (way bigger than my other toy examples)
+    A <- hgdp_subset
+    d <- 4
+    expect_silent( 
+        obj <- trunc_svd(A, d, force = TRUE)
+    )
+    # jump straight into comparison to R's vanilla SVD
+    obj2 <- svd( A, nu = d, nv = d )
+    # svd's d is always length n_ind, must subset
+    expect_equal( obj$d, obj2$d[ 1:d ] )
+    # signs differ randomly, just compare absolute values
+    expect_equal( abs(obj$u), abs(obj2$u) )
+    expect_equal( abs(obj$v), abs(obj2$v) )
+    
 })
 
 test_that("lfa works", {
@@ -174,7 +189,7 @@ test_that("lfa works with adjustments", {
     }
 })
 
-test_that( "lreg works", {
+test_that( ".lreg works", {
     # this core function is for data without missingness only!
 
     # get LFs from the full data with missingness (that's ok)
@@ -186,13 +201,13 @@ test_that( "lreg works", {
     x <- rbinom( n_ind, 2, p_anc )
 
     # expect errors when key data is missing
-    expect_error( lreg( ) )
-    expect_error( lreg( x = x ) )
-    expect_error( lreg( LF = LFs ) )
+    expect_error( .lreg( ) )
+    expect_error( .lreg( x = x ) )
+    expect_error( .lreg( LF = LFs ) )
     
     # begin test!
     expect_silent(
-        betas <- lreg( x = x, LF = LFs )
+        betas <- .lreg( x = x, LF = LFs )
     )
     # test that coefficients are as expected
     expect_true( is.numeric( betas ) )
@@ -214,7 +229,7 @@ test_that( "lreg works", {
 })
 
 test_that( "af_snp works", {
-    # like lreg, except NAs are handled and returns allele frequencies instead of coefficients
+    # like .lreg, except NAs are handled and returns allele frequencies instead of coefficients
 
     # get LFs from the full data
     d <- 3
@@ -272,13 +287,13 @@ test_that( "af works", {
     expect_true( !anyNA( P ) )
 })
 
-test_that( 'af_cap works', {
+test_that( '.af_cap works', {
     # only one param, mandatory
-    expect_error( af_cap() )
+    expect_error( .af_cap() )
 
     # proper run
     # use earlier A matrix, any continuous data should work
-    expect_silent( P <- af_cap( A ) )
+    expect_silent( P <- .af_cap( A ) )
     # test that AFs are as expected
     expect_true( is.numeric( P ) )
     expect_true( is.matrix( P ) )
@@ -287,7 +302,7 @@ test_that( 'af_cap works', {
     expect_true( !anyNA( P ) )
 
     # test vector version
-    expect_silent( pi <- af_cap( A[ 1, ] ) )
+    expect_silent( pi <- .af_cap( A[ 1, ] ) )
     # test that AFs are as expected
     expect_true( is.numeric( pi ) )
     expect_true( !is.matrix( pi ) )
@@ -331,60 +346,26 @@ test_that( "centerscale works", {
     expect_equal( A_cs, A_cs2 )
 })
 
-test_that( "check_geno works", {
+test_that( ".check_geno works", {
     # our simulated data should pass this check
-    expect_silent( check_geno( X ) )
+    expect_silent( .check_geno( X ) )
     
     # now creater expected failures
     # this tests all cases implemented
     # ... if encoding is different this way
-    expect_error( check_geno( X - 1 ) )
+    expect_error( .check_geno( X - 1 ) )
     # ... if matrix is not tall
-    expect_error( check_geno( t(X) ) )
+    expect_error( .check_geno( t(X) ) )
     # ... if it's a vector instead of a matrix
-    expect_error( check_geno( 0:2 ) )
+    expect_error( .check_geno( 0:2 ) )
     # ... if there is a fixed locus
     # (create a 4x3 matrix, so it is tall, and with data in correct range otherwise)
-    expect_error( check_geno( rbind(0:2, c(0,0,0), 2:0, 0:2 ) ) )
+    expect_error( .check_geno( rbind(0:2, c(0,0,0), 2:0, 0:2 ) ) )
     # ... with the other continuous matrix
-    expect_error( check_geno( A ) )
+    expect_error( .check_geno( A ) )
 })
 
-test_that( "inverse_2x2 works", {
-    # this should match `solve`, except behavior is different when matrices are singular
-    # create a random 2x2 matrix
-    # keep drawing random data until it is not singular!
-    rcondM <- 0 # condition number
-    while ( rcondM < 1e-10 ) {
-        M <- matrix(
-            rnorm(4),
-            nrow = 2,
-            ncol = 2
-        )
-        rcondM <- rcond( M )
-    }
-    # invert this way
-    expect_silent(
-        inv1 <- inverse_2x2( M )
-    )
-    # invert the other way
-    inv2 <- solve( M )
-    # compare
-    expect_equal( inv1, inv2 )
-
-    # now make sure than an actual singular matrix returns NA as expected
-    M <- matrix(
-        c(rnorm(2), 0, 0),
-        nrow = 2,
-        ncol = 2
-    )
-    expect_silent(
-        inv1 <- inverse_2x2( M )
-    )
-    expect_true( is.null( inv1 ) )
-})
-
-test_that( "gof_stat_snp works", {
+test_that( ".gof_stat_snp works", {
     # get LFs for test
     d <- 3
     LFs <- lfa( X = X, d = d )
@@ -395,14 +376,14 @@ test_that( "gof_stat_snp works", {
     for ( i in 1 : m_loci_max ) {
         xi <- X[ i, ]
         expect_silent(
-            stat <- gof_stat_snp( snp = xi, LF = LFs )
+            stat <- .gof_stat_snp( snp = xi, LF = LFs )
         )
         # validate features of the stat, which should be a scalar
         expect_equal( length(stat), 1 )
     }
 })
 
-test_that( "compute_nulls works", {
+test_that( ".compute_nulls works", {
     d <- 3
     B <- 2
     # first compute LFs
@@ -411,7 +392,7 @@ test_that( "compute_nulls works", {
     P <- af( X = X, LF = LFs )
     # now test begins
     expect_silent(
-        stat0 <- compute_nulls(P = P, d = d, B = B)
+        stat0 <- .compute_nulls(P = P, d = d, B = B)
     )
     # test return value
     expect_true( is.matrix( stat0 ) )
@@ -419,7 +400,7 @@ test_that( "compute_nulls works", {
     expect_equal( ncol( stat0 ), B )
 })
 
-test_that( "pvals_empir works", {
+test_that( ".pvals_empir works", {
     # generate some small random data with NAs
     # these don't need the same lenghts, so let's make it funky
     m0 <- 100 # total null (separate from observed)
@@ -435,7 +416,7 @@ test_that( "pvals_empir works", {
     stats0[ sample.int( m0, 5 ) ] <- NA
     stats1[ sample.int( m, 5 ) ] <- NA
     # compute p-values with naive, brute-force, clear formula
-    pvals <- pvals_empir_brute( stats1, stats0 )
+    pvals <- .pvals_empir_brute( stats1, stats0 )
     
     # another random dataset with discrete statistics, to make sure ties are handled correctly (are inequalities strict?)
     # replace Normal with Poisson
@@ -448,23 +429,23 @@ test_that( "pvals_empir works", {
     stats0_discr[ sample.int( m0, 5 ) ] <- NA
     stats1_discr[ sample.int( m, 5 ) ] <- NA
     # compute p-values with naive, brute-force, clear formula
-    pvals_discr <- pvals_empir_brute( stats1_discr, stats0_discr )
+    pvals_discr <- .pvals_empir_brute( stats1_discr, stats0_discr )
 
     # cause errors on purpose
     # all have missing arguments
-    expect_error( pvals_empir( ) )
-    expect_error( pvals_empir( stats1 ) )
-    expect_error( pvals_empir( stats0 = stats0 ) )
+    expect_error( .pvals_empir( ) )
+    expect_error( .pvals_empir( stats1 ) )
+    expect_error( .pvals_empir( stats0 = stats0 ) )
     
     # first direct test of Normal data
     expect_equal(
         pvals,
-        pvals_empir( stats1, stats0 )
+        .pvals_empir( stats1, stats0 )
     )
     # now discrete data
     expect_equal(
         pvals_discr,
-        pvals_empir( stats1_discr, stats0_discr )
+        .pvals_empir( stats1_discr, stats0_discr )
     )
 })
 
@@ -516,16 +497,16 @@ if (
     # load as a BEDMatrix object
     X_BEDMatrix <- suppressMessages(suppressWarnings( BEDMatrix( file_bed ) ))
 
-    test_that( "covar_BEDMatrix and covar_logit_BEDMatrix work", {
+    test_that( ".covar_BEDMatrix and .covar_logit_BEDMatrix work", {
         # computes not only covariance structure, but also mean vector
 
         # first compute data from ordinary R matrix, standard methods
-        covar_direct <- covar_basic( X )
+        covar_direct <- .covar_basic( X )
         X_mean <- rowMeans(X, na.rm = TRUE)
 
         # now compute from BEDMatrix object!
         expect_silent(
-            obj <- covar_BEDMatrix(X_BEDMatrix)
+            obj <- .covar_BEDMatrix(X_BEDMatrix)
         )
         # used "equivalent" because attributes differ, doesn't matter
         expect_equivalent( covar_direct, obj$covar )
@@ -557,21 +538,21 @@ if (
 
         # now test that subsequent step is also as desired
         expect_silent(
-            covar_Z <- covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V )
+            covar_Z <- .covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V )
         )
         expect_silent(
-            covar_Z_basic <- covar_logit_basic( X, V )
+            covar_Z_basic <- .covar_logit_basic( X, V )
         )
         expect_equal( covar_Z, covar_Z_basic )
         
         # repeat with edge case m_chunk
         expect_silent(
-            obj <- covar_BEDMatrix(X_BEDMatrix, m_chunk = 1)
+            obj <- .covar_BEDMatrix(X_BEDMatrix, m_chunk = 1)
         )
         expect_equivalent( covar_direct, obj$covar )
         expect_equal( X_mean, obj$X_mean )
         expect_silent(
-            covar_Z <- covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V, m_chunk = 1 )
+            covar_Z <- .covar_logit_BEDMatrix( X_BEDMatrix, X_mean, V, m_chunk = 1 )
         )
         expect_equal( covar_Z, covar_Z_basic )
     })

@@ -14,7 +14,7 @@ Sparse matrices of class Matrix are not supported (yet).}
 
 \item{LF}{matrix of logistic factors}
 
-\item{B}{number of null datasets to generate, \code{B = 1} is usualy
+\item{B}{number of null datasets to generate, \code{B = 1} is usually
 sufficient. If computational time/power allows, a few extra
 \code{B} could be helpful}
 

@@ -5,15 +5,13 @@
 \title{Truncated singular value decomposition}
 \usage{
 trunc_svd(
-  A,
-  d,
-  adjust = 3,
-  tol = 1e-10,
-  V = NULL,
-  seed = NULL,
-  ltrace = FALSE,
-  override = FALSE,
-  force = FALSE
+    A,
+    d,
+    adjust = 3,
+    tol = .Machine$double.eps,
+    override = FALSE,
+    force = FALSE,
+    maxit = 1000
 )
 }
 \arguments{
@@ -25,28 +23,40 @@ trunc_svd(
 
 \item{tol}{convergence criterion}
 
-\item{V}{optional initial guess}
+\item{override}{\code{TRUE} means we use
+\code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} instead of the
+iterative algorithm (useful for small data or very high \code{d}).}
 
-\item{seed}{seed}
+\item{force}{If \code{TRUE}, forces the Lanczos algorithm to be used on all
+datasets (usually
+\code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}
+is used on small datasets or large \code{d})}
 
-\item{ltrace}{debugging output}
-
-\item{override}{\code{TRUE} means we use \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} instead of the iterative algorithm (useful for small data or very high \code{d}).}
-
-\item{force}{If \code{TRUE}, forces the Lanczos algorithm to be used on all datasets (usually \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} is used on small datasets and other conditions)}
+\item{maxit}{Maximum number of iterations}
 }
 \value{
-list with singular value decomposition.
+list with singular value decomposition.  Has elements 'd', 'u', 'v',
+and 'iter'
 }
 \description{
 Truncated SVD
 }
 \details{
-Performs singular value decomposition but only returns the first \code{d} singular vectors/values.
+Performs singular value decomposition but only returns the first \code{d}
+singular vectors/values.
 The truncated SVD utilizes Lanczos bidiagonalization.
 See references.
 
 This function was modified from the package irlba 1.0.1 under GPL.
-Replacing the \code{\link[=crossprod]{crossprod()}} calls with the C wrapper to \code{dgemv} is a dramatic difference in larger datasets.
-Since the wrapper is technically not a matrix multiplication function, it seemed wise to make a copy of the function.
+Replacing the \code{\link[=crossprod]{crossprod()}} calls with the C wrapper to
+\code{dgemv} is a dramatic difference in larger datasets.
+Since the wrapper is technically not a matrix multiplication function, it
+seemed wise to make a copy of the function.
+}
+\examples{
+obj <- trunc_svd( hgdp_subset, 4 )
+obj$d
+obj$u
+obj$v
+obj$iter
 }
