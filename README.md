@@ -33,20 +33,18 @@ As a rule of thumb, the in memory sizes of a few relevant genotype matrices:
 
 `BEDMatrix` inputs consume much less memory but can be slower otherwise.
 
-## FAQ
+## Troubleshoot
 
-Apple OS X users may experience a problem due to Fortran code that is included in this package.  This gfortran issue is discussed here: 
-
-http://www.thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error. 
-
-A solution that has worked for us is to follow the advice given above. Specifically, open a Terminal and type:
+Apple OS X users may experience a problem due to Fortran code that is included in this package. You must install the X code command line tools (XCode CLI) and `gfortran`.  Try the following commands on terminal:
 
 ```
-curl -O http://r.research.att.com/libs/gfortran-4.8.2-darwin13.tar.bz2
-sudo tar fvxz gfortran-4.8.2-darwin13.tar.bz2 -C /
+xcode-select --install 
+brew install gcc
 ```
 
-If you know what causes this, let us know!
+If XCode installation fails, you may have to sign up on Apple Developer: https://www.ics.uci.edu/~pattis/common/handouts/macmingweclipse/allexperimental/macxcodecommandlinetools.html
+
+Alternatively, this Installer Package for macOS R toolchain may work https://github.com/rmacoslib/r-macos-rtools/
 
 ## Citations
 
