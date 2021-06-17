@@ -1,0 +1,16 @@
+bibentry(
+    bibtype = "Article",
+    title   = "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies",
+    author  = personList(
+        person("Wei", "Hao"),
+        person("Minsun", "Song"),
+        person("John D.", "Storey")
+    ),
+    journal = "Bioinformatics",
+    year    = "2016",
+    doi     = '10.1093/bioinformatics/btv641',
+    volume  = "32",
+    number  = "5",
+    pages   = "713-21",
+    issn    = "1367-4811"
+)

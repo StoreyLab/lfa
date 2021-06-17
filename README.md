@@ -1,47 +1,52 @@
-lfa
-===
+# lfa
 
-logistic factor analysis
+Logistic factor analysis
 
-Pre-print available: http://arxiv.org/abs/1312.2041
+## Installation
 
-Installation
-===
+To install latest version on Bioconductor, open R and type:
 
-Apple OS X users, see FAQ below.  To install, open R and type:
+```R
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
+BiocManager::install("lfa")
+```
+
+You can also install development version from GitHub this way:
 ```R
 install.packages("devtools")
 library("devtools")
 install_github("Storeylab/lfa")
 ```
+Apple OS X users, see FAQ below.
 
-Data input
-===
+## Data input
 
-Recommend using `read.bed` to read in a PLINK binary genotype file, or manually reading a text file of 0, 1, and 2 via `read.table` with the `colClasses` option set to `rep("integer", n)`, where `n` is the number of individuals.
+We recommend using the `genio` or `BEDMatrix` packages to read genotype data into an R matrix.
 
-Be warned that both the `lfa` function and the genotype matrices require a lot of memory, since we're just storing the genotype matrices as integer arrays (which take up a lot of space in R!) and doing normal math operations on them. As a rule of thumb, the in memory sizes of a few relevant genotype matrices:
+Be warned that genotype matrices from `genio` and some `lfa` functions require a lot of memory.
+As a rule of thumb, the in memory sizes of a few relevant genotype matrices:
 
-- 431345 SNPs by 940 individuals: 1.5 Gb needed for genotype matrix, about 9 Gb to run `lfa`.
-- 339100 SNPs by 1500 individuals: 1.9 Gb needed for genotype matrix, about 11.5 Gb to run `lfa`.
+- 431345 SNPs by 940 individuals: 1.5 GB needed for genotype matrix, about 9 GB to run `lfa`.
+- 339100 SNPs by 1500 individuals: 1.9 GB needed for genotype matrix, about 11.5 GB to run `lfa`.
 
-If you want to run something but don't have the computing power for it, shoot me an email at whao@princeton.edu. There are number of workarounds that can trade off between memory and time that I've used in the past.
+`BEDMatrix` inputs consume much less memory but can be slower otherwise.
 
+## Troubleshoot
 
-FAQ
-===
-
-Apple OS X users may experience a problem due to Fortran code that is included in this package.  This gfortran issue is discussed here: 
-
-http://www.thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error. 
-
-A solution that has worked for us is to follow the advice given above. Specifically, open a Terminal and type:
+Apple OS X users may experience a problem due to Fortran code that is included in this package. You must install the X code command line tools (XCode CLI) and `gfortran`.  Try the following commands on terminal:
 
 ```
-curl -O http://r.research.att.com/libs/gfortran-4.8.2-darwin13.tar.bz2
-sudo tar fvxz gfortran-4.8.2-darwin13.tar.bz2 -C /
+xcode-select --install 
+brew install gcc
 ```
 
-If you know what causes this, let us know!
+If XCode installation fails, you may have to sign up on Apple Developer: https://www.ics.uci.edu/~pattis/common/handouts/macmingweclipse/allexperimental/macxcodecommandlinetools.html
+
+Alternatively, this Installer Package for macOS R toolchain may work https://github.com/rmacoslib/r-macos-rtools/
+
+## Citations
+
+Hao, Wei, Minsun Song, and John D. Storey. "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies." Bioinformatics (Oxford, England) 32, no. 5 (March 1, 2016): 713–21. [doi:10.1093/bioinformatics/btv641](https://doi.org/10.1093/bioinformatics/btv641). [arXiv](http://arxiv.org/abs/1312.2041).
 

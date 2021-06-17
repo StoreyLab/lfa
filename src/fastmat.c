@@ -1,6 +1,6 @@
 #include "lfa.h"
 
-SEXP mv(SEXP RA, SEXP Rv){
+SEXP mv_c(SEXP RA, SEXP Rv){
     int *dimA;
     double *v, *A;
 
@@ -26,7 +26,7 @@ SEXP mv(SEXP RA, SEXP Rv){
     return Rret;
 }
 
-SEXP tmv(SEXP RA, SEXP Rv){
+SEXP tmv_c(SEXP RA, SEXP Rv){
     int *dimA;
     double *v, *A;
 

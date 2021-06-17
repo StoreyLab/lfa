@@ -4,41 +4,72 @@
 \alias{lfa}
 \title{Logistic factor analysis}
 \usage{
-lfa(X, d, adjustments = NULL, override = FALSE, safety = FALSE)
+lfa(
+    X,
+    d,
+    adjustments = NULL,
+    override = FALSE,
+    safety = FALSE,
+    rspectra = FALSE,
+    ploidy = 2,
+    tol = .Machine$double.eps,
+    m_chunk = 1000
+)
 }
 \arguments{
-\item{X}{a matrix of SNP genotypes, i.e. an integer matrix of 0's,
-1's, and 2's. Sparse matrices of class Matrix are not supported
-(yet).}
+\item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
+1's, 2's and \code{NA}s.
+BEDMatrix is supported.
+Sparse matrices of class Matrix are not supported (yet).}
 
-\item{d}{number of logistic factors, including the intercept}
+\item{d}{Number of logistic factors, including the intercept}
 
-\item{adjustments}{a matrix of adjustment variables to hold fixed 
-during estimation.}
+\item{adjustments}{A matrix of adjustment variables to hold fixed during
+estimation.  Number of rows must equal number of individuals in \code{X}.
+These adjustments take the place of LFs in the output, so the number of
+columns must not exceed \code{d-2} to allow for the intercept and at least one
+proper LF to be included.
+When present, these adjustment variables appear in the first columns of the
+output.
+Not supported when \code{X} is a BEDMatrix object.}
 
-\item{override}{optional boolean to bypass Lanczos bidiagonalization
-SVD. Usually not advised unless encountering a bug in the SVD code.}
+\item{override}{Optional boolean passed to \code{\link[=trunc_svd]{trunc_svd()}}
+to bypass its Lanczos bidiagonalization SVD, instead using
+\code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}.
+Usually not advised unless encountering a bug in the SVD code.
+Ignored if \code{X} is a BEDMatrix object.}
 
-\item{safety}{optional boolean to bypass checks on the genotype
-matrices, which require a non-trivial amount of computation.}
+\item{safety}{Optional boolean to bypass checks on the genotype
+matrices, which require a non-trivial amount of computation.
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{rspectra}{If \code{TRUE}, use
+\code{\link[RSpectra:svds]{RSpectra::svds()}} instead of default
+\code{\link[=trunc_svd]{trunc_svd()}} or
+\code{\link[corpcor:fast.svd]{corpcor::fast.svd()}} options.
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{ploidy}{Ploidy of data, defaults to 2 for bi-allelic unphased SNPs}
+
+\item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per
+chunk (to control memory usage).}
 }
 \value{
-matrix of logistic factors, with the intercept at the end.
+The matrix of logistic factors, with individuals along rows and
+factors along columns.
+The intercept appears at the end of the columns, and adjustments in the
+beginning if present.
 }
 \description{
-Fit a factor model of dimension \eqn{d} for binomial data. Returns 
-logistic factors.
+Fit logistic factor model of dimension \code{d} to binomial data.
+Computes \code{d - 1} singular vectors followed by intercept.
 }
 \details{
-This function performs logistic factor analysis on SNP data. As it
-stands, we follow the convention where \eqn{d=1} is intercept only,
-and for \eqn{d>1} we compute \eqn{d-1} singular vectors and postpend
-the intercept.
-}
-\note{
-Genotype matrix is expected to be a matrix of integers with
-values 0, 1, and 2. Note
-that the coding of the SNPs does not affect the algorithm.
+Genotype matrix should have values in 0, 1, 2, or \code{NA}.
+The coding of the SNPs (which case is 0 vs 2) does not change the output.
 }
 \examples{
 LF <- lfa(hgdp_subset, 4)

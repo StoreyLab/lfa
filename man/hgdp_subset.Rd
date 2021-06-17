@@ -4,7 +4,9 @@
 \name{hgdp_subset}
 \alias{hgdp_subset}
 \title{HGDP subset}
-\format{a matrix of 0's, 1's and 2's.}
+\format{
+a matrix of 0's, 1's and 2's.
+}
 \source{
 Stanford HGDP \url{http://www.hagsc.org/hgdp/files.html}
 }

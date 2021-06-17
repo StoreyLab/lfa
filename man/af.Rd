@@ -4,18 +4,24 @@
 \alias{af}
 \title{Allele frequencies}
 \usage{
-af(X, LF, safety = FALSE)
+af(X, LF, safety = FALSE, max_iter = 100, tol = 1e-10)
 }
 \arguments{
-\item{X}{a matrix of SNP genotypes, i.e. an integer matrix of 0's,
-1's, and 2's. Sparse matrices of class Matrix are not supported
-(yet).}
+\item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
+1's, 2's and \code{NA}s.
+BEDMatrix is supported.
+Sparse matrices of class Matrix are not supported (yet).}
 
-\item{LF}{Matrix of logistic factors, with intercept. Pass in the 
-return value from \code{lfa}!}
+\item{LF}{Matrix of logistic factors, with intercept.
+Pass in the return value from \code{\link[=lfa]{lfa()}}!}
 
-\item{safety}{optional boolean to bypass checks on the genotype
-matrices, which require a non-trivial amount of computation.}
+\item{safety}{Optional boolean to bypass checks on the genotype
+matrices, which require a non-trivial amount of computation.
+Ignored if \code{X} is a BEDMatrix object.}
+
+\item{max_iter}{Maximum number of iterations for logistic regression}
+
+\item{tol}{Numerical tolerance for convergence of logistic regression}
 }
 \value{
 Matrix of individual-specific allele frequencies.
@@ -24,14 +30,14 @@ Matrix of individual-specific allele frequencies.
 Compute matrix of individual-specific allele frequencies
 }
 \details{
-Computes the matrix of individual-specific allele 
+Computes the matrix of individual-specific allele
 frequencies, which has the same dimensions of the genotype matrix.
-Be warned that this function could use a ton of memory, as the 
-return value is all doubles. It could be wise to pass only a 
+Be warned that this function could use a ton of memory, as the
+return value is all doubles. It could be wise to pass only a
 selection of the SNPs in your genotype matrix to get an idea for
-memory usage. Use \code{gc} to check memory usage!
+memory usage. Use \code{\link[=gc]{gc()}} to check memory usage!
 }
 \examples{
-LF = lfa(hgdp_subset, 4)
-allele_freqs = af(hgdp_subset, LF)
+LF <- lfa( hgdp_subset, 4 )
+allele_freqs <- af( hgdp_subset, LF )
 }
