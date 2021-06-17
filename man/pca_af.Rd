@@ -14,7 +14,9 @@ Sparse matrices of class Matrix are not supported (yet).}
 
 \item{d}{Number of logistic factors, including the intercept}
 
-\item{override}{Optional boolean passed to \code{\link[=trunc_svd]{trunc_svd()}} to bypass its Lanczos bidiagonalization SVD, instead using \code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}.
+\item{override}{Optional boolean passed to \code{\link[=trunc_svd]{trunc_svd()}}
+to bypass its Lanczos bidiagonalization SVD, instead using
+\code{\link[corpcor:fast.svd]{corpcor::fast.svd()}}.
 Usually not advised unless encountering a bug in the SVD code.
 Ignored if \code{X} is a BEDMatrix object.}
 
@@ -23,7 +25,8 @@ Ignored if \code{X} is a BEDMatrix object.}
 \item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
 Ignored if \code{X} is a BEDMatrix object.}
 
-\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per chunk (to control memory usage).}
+\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per
+chunk (to control memory usage).}
 }
 \value{
 Matrix of individual-specific allele frequencies.
@@ -37,8 +40,8 @@ This corresponds to algorithm 1 in the paper. Only used for
 comparison purposes.
 }
 \examples{
-LF = lfa(hgdp_subset, 4)
-allele_freqs_lfa = af(hgdp_subset, LF)
-allele_freqs_pca = pca_af(hgdp_subset, 4)
+LF <- lfa(hgdp_subset, 4)
+allele_freqs_lfa <- af(hgdp_subset, LF)
+allele_freqs_pca <- pca_af(hgdp_subset, 4)
 summary(abs(allele_freqs_lfa-allele_freqs_pca))
 }

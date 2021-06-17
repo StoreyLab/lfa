@@ -16,5 +16,5 @@ matrix same dimensions \code{A} but row centered and scaled
 C routine to row-center and scale a matrix. Doesn't work with missing data.
 }
 \examples{
-centerscale(hgdp_subset)
+Xc <- centerscale(hgdp_subset)
 }

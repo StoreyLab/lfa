@@ -1,16 +1,35 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.0.6.9000
-Author: Wei Hao, Minsun Song, Alejandro Ochoa, John D. Storey
-Maintainer: Alejandro Ochoa <alejandro.ochoa@duke.edu>, Wei Hao <whao@princeton.edu>, John D. Storey <jstorey@princeton.edu>
+Version: 2.0.7
+Authors@R: c(
+    person(given = "Wei",
+	   family = "Hao",
+	   role = "aut",
+	   email = "whao@princeton.edu"),
+    person(given = "Minsun",
+	   family = "Song",
+	   role = "aut"),
+    person(given = "Alejandro",
+	   family = "Ochoa",
+	   role = c("aut", "cre"),
+	   email = "alejandro.ochoa@duke.edu",
+           comment = c(ORCID = "0000-0003-4928-3403")),
+    person(given = "John D.",
+           family = "Storey",
+	   role = "aut",
+	   email = "jstorey@princeton.edu",
+           comment = c(ORCID = "0000-0001-5992-402X"))
+    )
 Encoding: UTF-8
 LazyData: true
-Description: LFA is a method for a PCA analogue on Binomial data via estimation of latent structure in the natural parameter.
+Description: LFA is a method for a PCA analogue on Binomial data via estimation of latent structure in the natural parameter.  The main method estimates genetic population structure from genotype data.  There are also methods for estimating individual-specific allele frequencies using the population structure.  Lastly, a structured Hardy-Weinberg equilibrium (HWE) test is developed, which quantifies the goodness of fit of the genotype data to the estimated population structure, via the estimated individual-specific allele frequencies (all of which generalizes traditional HWE tests).
 Imports:
+    utils,
+    methods,
     corpcor,
     RSpectra
 Depends:
-    R (>= 3.2)
+    R (>= 4.0)
 Suggests:
     knitr,
     ggplot2,
@@ -19,7 +38,7 @@ Suggests:
     genio
 VignetteBuilder: knitr
 License: GPL-3
-biocViews: SNP, DimensionReduction, PrincipalComponent
+biocViews: SNP, DimensionReduction, PrincipalComponent, Regression
 BugReports: https://github.com/StoreyLab/lfa/issues
 URL: https://github.com/StoreyLab/lfa
 Roxygen: list(markdown = TRUE)

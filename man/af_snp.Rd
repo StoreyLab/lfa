@@ -23,3 +23,13 @@ vector of allele frequencies
 Computes individual-specific allele frequencies for a
 single SNP.
 }
+\examples{
+LF <- lfa(hgdp_subset, 4)
+# pick one SNP only
+snp <- hgdp_subset[ 1, ]
+# allele frequency vector for that SNO only
+allele_freqs_snp <- af_snp(snp, LF)
+}
+\seealso{
+\code{\link[=af]{af()}}
+}

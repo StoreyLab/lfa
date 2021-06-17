@@ -5,9 +5,9 @@
 #'
 #' @param A matrix
 #' @examples
-#' centerscale(hgdp_subset)
+#' Xc <- centerscale(hgdp_subset)
 #' @return matrix same dimensions `A` but row centered and scaled
 #' @export
-centerscale <- function(A){
+centerscale <- function(A) {
     as.matrix(.Call("centerscale_c", A))
 }

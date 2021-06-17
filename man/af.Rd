@@ -38,6 +38,6 @@ selection of the SNPs in your genotype matrix to get an idea for
 memory usage. Use \code{\link[=gc]{gc()}} to check memory usage!
 }
 \examples{
-LF = lfa(hgdp_subset, 4)
-allele_freqs = af(hgdp_subset, LF)
+LF <- lfa( hgdp_subset, 4 )
+allele_freqs <- af( hgdp_subset, LF )
 }

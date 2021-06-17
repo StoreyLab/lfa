@@ -29,9 +29,9 @@
 
 \section{Introduction}
 
-Logistic Factor Analysis (LFA)~\cite{Hao2013}. Briefly, LFA fits a latent
-variable model on categorical (i.e. SNP genotypes coded as 0, 1, and 2) data by
-modelling the logit transformed binomial parameters in terms of latent
+Logistic Factor Analysis (LFA)~\cite{hao_probabilistic_2016}. Briefly, LFA fits
+a latent variable model on categorical (i.e. SNP genotypes coded as 0, 1, and 2)
+data by modeling the logit transformed binomial parameters in terms of latent
 variables. The resulting ``logistic factors'' are analagous to principal
 components, but fit into a convenient likelihood based model. As a result, the
 logistic factors can power a number of other analyses.
@@ -55,7 +55,7 @@ genotype matrix, and the second is the number of logistic factors
 including the intercept.
 
 <<lfa>>=
-LF = lfa(hgdp_subset, 4)
+LF <- lfa(hgdp_subset, 4)
 dim(LF)
 head(LF)
 @
@@ -64,11 +64,11 @@ We can plot the first two logistic factors and color by geographical
 information:
 
 <<lfa_plot, fig.width=5, fig.height=4.5>>=
-dat = data.frame(LF[,1], LF[,2], colnames(hgdp_subset))
+dat <- data.frame(LF[,1], LF[,2], colnames(hgdp_subset))
 colnames(dat) = c("LF1", "LF2", "geo")
 library(ggplot2)
 ggplot(dat, aes(LF1, LF2, color=geo)) + geom_point() + theme_bw() +
-  coord_fixed(ratio=(max(dat[,1])-min(dat[,1]))/(max(dat[,2])-min(dat[,2])))
+    coord_fixed(ratio=(max(dat[,1])-min(dat[,1]))/(max(dat[,2])-min(dat[,2])))
 @
 
 One aspect of \texttt{lfa} is that the return value is a matrix of 
@@ -81,7 +81,7 @@ Given a genotype matrix and logistic factors, the \texttt{af} function
 computes the individual-specific allele frequencies
 
 <<af1>>=
-allele_freqs = af(hgdp_subset, LF)
+allele_freqs <- af(hgdp_subset, LF)
 allele_freqs[1:5, 1:5]
 @
 
@@ -90,7 +90,7 @@ subset of the genotype matrix as an argument if you aren't interested
 in all the SNPs. 
 
 <<af2>>=
-subset = af(hgdp_subset[15:25,], LF)
+subset <- af(hgdp_subset[15:25,], LF)
 subset[1:5,1:5]
 @
 
@@ -98,20 +98,22 @@ Given the allele frequencies, you can do some other interesting
 calculations---for example, compute the log-likelihood for each SNP.
 
 <<af3>>=
-ll = function(snp, af){
+ll <- function(snp, af){
     -sum(snp*log(af) + (2-snp)*log(1-af))
 }
-log_lik = sapply(1:nrow(hgdp_subset), function(i) {ll(hgdp_subset[i,], allele_freqs[i,])})
+log_lik <- sapply(1:nrow(hgdp_subset), function(i) {ll(hgdp_subset[i,], 
+    allele_freqs[i,])})
 which(max(log_lik) == log_lik)
 @
 
 \section{Data Input}
 
-The best way to load genotypes is by using the function \texttt{read.bed},
-which assumes that you have binary PLINK formatted genotypes. The binary PLINK
-format uses files: a \texttt{.bed} for the genotypes, a \texttt{.bim} for the
-genotype information, and a \texttt{.fam} for the individuals information.
-\texttt{read.bed} takes as an argument the prefix for your three files.
+The best way to load genotypes is by using the function \texttt{read\_plink}, 
+from the \texttt{genio} package, which assumes that you have binary PLINK 
+formatted genotypes. The binary PLINK format uses files: a \texttt{.bed} for 
+the genotypes, a \texttt{.bim} for the genotype information, and a 
+\texttt{.fam} for the individuals information.
+\texttt{read\_plink} takes as an argument the prefix for your three files.
 
 \bibliographystyle{plain}
 \bibliography{lfa}

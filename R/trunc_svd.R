@@ -4,271 +4,149 @@
 #' Truncated SVD
 #'
 #' @details
-#' Performs singular value decomposition but only returns the first `d` singular vectors/values.
+#' Performs singular value decomposition but only returns the first `d` 
+#' singular vectors/values.
 #' The truncated SVD utilizes Lanczos bidiagonalization.
 #' See references.
 #' 
 #' This function was modified from the package irlba 1.0.1 under GPL.
-#' Replacing the [crossprod()] calls with the C wrapper to `dgemv` is a dramatic difference in larger datasets.
-#' Since the wrapper is technically not a matrix multiplication function, it seemed wise to make a copy of the function.
+#' Replacing the [crossprod()] calls with the C wrapper to
+#' `dgemv` is a dramatic difference in larger datasets.
+#' Since the wrapper is technically not a matrix multiplication function, it
+#' seemed wise to make a copy of the function.
 #' 
 #' @param A matrix to decompose
 #' @param d number of singular vectors
 #' @param adjust extra singular vectors to calculate for accuracy
 #' @param tol convergence criterion
-#' @param V optional initial guess
-#' @param seed seed
-#' @param ltrace debugging output
-#' @param override `TRUE` means we use [corpcor::fast.svd()] instead of the iterative algorithm (useful for small data or very high `d`).
-#' @param force If `TRUE`, forces the Lanczos algorithm to be used on all datasets (usually [corpcor::fast.svd()] is used on small datasets and other conditions)
-#' @return list with singular value decomposition.
+#' @param override `TRUE` means we use
+#' [corpcor::fast.svd()] instead of the
+#' iterative algorithm (useful for small data or very high `d`).
+#' @param force If `TRUE`, forces the Lanczos algorithm to be used on all
+#' datasets (usually
+#' [corpcor::fast.svd()]
+#' is used on small datasets or large `d`)
+#' @param maxit Maximum number of iterations
+#' @return list with singular value decomposition.  Has elements 'd', 'u', 'v',
+#' and 'iter'
+#' @examples
+#' obj <- trunc_svd( hgdp_subset, 4 )
+#' obj$d
+#' obj$u
+#' obj$v
+#' obj$iter
 #' @export
-trunc_svd <- function (
-                       A,
-                       d,
-                       adjust = 3,
-                       tol = 1e-10,
-                       V = NULL, 
-                       seed = NULL,
-                       ltrace = FALSE,
-                       override = FALSE,
-                       force = FALSE
-                       ) {
-    if ( missing( A ) )
-        stop( 'Input matrix `A` is required!' )
-    if ( missing( d ) )
-        stop( 'Dimension number `d` is required!' )
-    
-    if ( !is.null( seed ) )
-        set.seed( seed )
-    maxit <- 1000
-    eps <- .Machine$double.eps
-    
-    m <- nrow( A )
-    n <- ncol( A )
-
-    if ( !force ) {
-        # uses fast.svd() instead if approximate conditions are satisified
-        # this mostly assumes small matrices (memory not an issue anyway)
-        # d > n/20: this could be for large matrices, but large d too (when n is very large, this is unlikely)
-        if ( ( log10( m ) + log10( n ) ) <= 6 || m < 1000 || n < 100 || d > n / 20 || override ) {
-            # this check clarifies problems in toy cases, where m becomes too small after `lfa_threshold`
-            if ( d > min(m, n) )
-                stop("d must be less than min(m,n)")
-            mysvd <- corpcor::fast.svd( A )
-            return(
-                list(
-                    d = mysvd$d[ 1 : d ],
-                    u = mysvd$u[ , 1 : d, drop = FALSE ],
-                    v = mysvd$v[ , 1 : d, drop = FALSE ],
-                    iter = 0
-                )
-            )
+trunc_svd <- function(A, d, adjust = 3, tol = .Machine$double.eps,
+    override = FALSE, force = FALSE, maxit = 1000) {
+    if (missing(A))
+        stop("Input matrix `A` is required!")
+    if (missing(d))
+        stop("Dimension number `d` is required!")
+    if (d <= 0)
+        stop("d must be positive")
+    m <- nrow(A)
+    n <- ncol(A)
+    if (d > min(m, n))
+        stop("d must be less than min(m,n)")
+    if (!force) { # uses fast.svd() for small matrices or large `d`
+        if ((log10(m) + log10(n)) <= 6 || m < 1000 || n < 100 || d > n/20 ||
+            override) {
+            mysvd <- corpcor::fast.svd(A)
+            indexes <- seq_len(d)
+            return(list(d = mysvd$d[indexes], u = mysvd$u[, indexes,
+                drop = FALSE], v = mysvd$v[, indexes, drop = FALSE], iter = NA))
         }
     }
-    
-    # *adjust* d
-    d_org <- d # remember original value
-    d <- d + adjust
+    d_org <- d  # remember original value
+    d <- d + adjust # *adjust* d
     if (m < n)
         stop("expecting tall or sq matrix")
-    if (d <= 0) 
-        stop("d must be positive")
-    if (d > min(m, n)) 
+    if (d > min(m, n))
         stop("d must be less than min(m,n)-adjust")
-    if (tol < 0) 
-        stop("tol must be non-negative")
-    if (maxit <= 0) 
-        stop("maxit must be positive")
-    
-    m_b <- 3
-    if (m_b >= min(n, m)) {
-        m_b <- floor(min(n, m) - 0.1)
-        if (m_b - d - 1 < 0) {
-            adjust <- 0
-            d <- m_b - 1
-        }
-    }
-    if (m_b - d - 1 < 0) 
-        m_b <- ceiling(d+1+0.1)
-    if (m_b >= min(m, n)) {
-        m_b <- floor(min(m, n) - 0.1)
-        adjust <- 0
-        d <- m_b - 1
-    }
-
-    if (tol < eps) 
-        tol <- eps
-
-    # NOTE: this W matrix is huge when m is from WGS data
-    W <- matrix(0, m, m_b)
-    G <- matrix(0, n, 1)
-    if (is.null(V)) {
-        V <- matrix(0, n, m_b)
-        V[, 1] <- stats::rnorm(n)
-    } else
-        V <- cbind(V, matrix(0, n, m_b - ncol(V)))
-    
-    B <- NULL
-    Bsz <- NULL
-    eps23 <- eps^(2/3)
-    I <- NULL
-    J <- NULL
+    W <- matrix(0, m, d + 1)
+    V <- matrix(0, n, d + 1)
+    V <- .new_col_ortho_unit(V, 1)
+    dat <- list()
     iter <- 1
-    R_F <- NULL
-    Smax <- 1
-    Smin <- NULL
-    SVTol <- min( sqrt( eps ), tol )
-
-    while ( iter <= maxit ) {
-        j <- 1
-        # normalize starting vector
-        if ( iter == 1 ) {
-            V[, 1] <- unit_vector( V[, 1, drop = FALSE] )
-        } else j <- d + 1
-        
-        # compute W=AV using mv
-        W[ , j ] <- as.matrix( .Call( "mv_c", A, V[ , j, drop = FALSE ] ) )
-        
-        # orthogonalize W
-        if ( iter != 1 ) {
-            W[ , j ] <- orthog(
-                W[ , j, drop = FALSE ],
-                W[ , 1:j - 1, drop = FALSE ]
-            )
-        }
-        
-        # normalize W and check for dependent vectors
-        S <- norm( W[ , j, drop = FALSE ] ) # L_2 norm
-        if ( ( S < SVTol ) && ( j == 1 ) ) 
-            stop( "starting vector near the null space" )
-        if ( S < SVTol ) { # check if enters??
-            W[ , j ] <- stats::rnorm(nrow(W))
-            W[ , j ] <- orthog(
-                W[ , j, drop = FALSE ],
-                W[ , 1:j - 1, drop = FALSE ]
-            )
-            W[ , j ] <- unit_vector( W[ , j, drop = FALSE ] )
-            S <- 0
-        } else
-            W[ , j] <- W[ , j, drop = FALSE ] / S
-        
-        # lanczos steps
-        while ( j <= m_b ) {
-            G <- as.matrix( .Call( "tmv_c", A, W[ , j, drop = FALSE ] ) )
-            
-            G <- G - S * V[ , j, drop = FALSE ]
-            
-            # orthog
-            G <- orthog( G, V[ , 1:j, drop = FALSE ] )
-            
-            # while not the 'edge' of the bidiagonal matrix
-            if ( j + 1 <= m_b ) {
-                R <- norm( G )
-                # check for dependence
-                if ( R <= SVTol ) {
-                    G <- matrix( stats::rnorm( nrow( V ) ), nrow( V ), 1 )
-                    G <- orthog( G, V[ , 1:j, drop = FALSE ] )
-                    V[ , j + 1 ] <- unit_vector( G )
-                    R <- 0
-                } else
-                    V[ , j + 1 ] <- G / R
-                
-                # make block diag matrix
-                if ( is.null( B ) ) {
-                    B <- cbind(S, R)
-                } else
-                    B <- rbind( cbind(B, 0), c( rep( 0, j - 1 ), S, R ) )
-
-                W[ , j + 1 ] <- as.matrix( .Call( "mv_c", A, V[ , j + 1, drop = FALSE ] ) )
-                
-                # reorthog
-                W[ , j + 1 ] <- W[ , j + 1, drop = FALSE ] - W[ , j, drop = FALSE ] * R
-                
-                # orthog
-                if ( iter == 1 ) 
-                    W[ , j + 1 ] <- orthog(
-                        W[ , j + 1, drop = FALSE ],
-                        W[ , 1 : j, drop = FALSE ]
-                    )
-                S <- norm( W[ , j + 1, drop = FALSE ] )
-
-                if ( S <= SVTol ) {
-                    # replace column with random data!
-                    W[ , j + 1 ] <- stats::rnorm( nrow( W ) )
-                    # orthogonalize
-                    W[ , j + 1 ] <- orthog(
-                        W[ , j + 1, drop = FALSE ],
-                        W[ , 1 : j, drop = FALSE ]
-                    )
-                    # make unit norm
-                    W[ , j + 1 ] <- unit_vector( W[ , j + 1, drop = FALSE ] )
-                    S <- 0
-                } else
-                    W[ , j + 1 ] <- W[ , j + 1, drop = FALSE ] / S
-            } else {
-                # add block
-                B <- rbind( B, c( rep( 0, j - 1 ), S ) )
-            }
-            j <- j + 1
-        }
-        
-        # compute SVD of bidiag matrix 
-        Bsz <- nrow( B )
-        R_F <- norm( G )
-        G <- G / R_F
-        Bsvd <- svd( B )
-        
-        #print(rev(sort(sapply(ls(), function (object.name) object.size(get(object.name))))))
-
-        if ( iter == 1 ) {
-            Smax <- Bsvd$d[ 1 ]
-            Smin <- Bsvd$d[ Bsz ]
-        } else {
-            Smax <- max( Smax, Bsvd$d[ 1 ] )
-            Smin <- min( Smin, Bsvd$d[ Bsz ] )
-        }
-        Smax <- max( eps23, Smax )
-        
-        # compute residuals
-        R <- R_F * Bsvd$u[ Bsz, , drop = FALSE ]
-        
-        # check for convergence
-        ct <- convtests( Bsz, tol, d_org, abs(R), d, SVTol, Smax )
-        d <- ct$d
-        
-        # break criterion
-        if ( ct$converged ) 
-            break
-        if ( iter >= maxit )
-            break
-        
-        # next step in iteration --- re-initialize starting V and B
-        V[ , 1 : ( d + ncol( G ) ) ] <- cbind(
-            V[ , 1 : nrow( Bsvd$v ), drop = FALSE ] %*% Bsvd$v[, 1 : d, drop = FALSE ],
-            G
-        )
-        B <- cbind(
-            diag( Bsvd$d[ 1 : d, drop = FALSE ] ),
-            R[ 1 : d, drop = FALSE ]
-        )
-        
-        # update left SVd
-        W[ , 1 : d ] <- W[ , 1 : nrow( Bsvd$u ), drop = FALSE ] %*% Bsvd$u[ , 1 : d, drop = FALSE ]
+    while (iter <= maxit) {
+        dat <- .trunc_svd_iter(A, V, W, dat$B, dat$Smax, d, d_org, iter, tol)
+        V <- dat$V
+        W <- dat$W
+        Bsvd <- dat$Bsvd
+        if (dat$converged || iter >= maxit) break  # break criterion
+        d <- dat$d
+        V[, seq_len(d + 1)] <- cbind(V[, seq_len(nrow(Bsvd$v))] %*%
+            Bsvd$v[, seq_len(d)], dat$G)
+        dat$B <- cbind(diag(Bsvd$d[seq_len(d)]), dat$R[seq_len(d)])
+        W[, seq_len(d)] <- W[, seq_len(nrow(Bsvd$u))] %*% Bsvd$u[, seq_len(d)]
         iter <- iter + 1
     }
-    d <- Bsvd$d[ 1 : d_org ]
-    u <- W[ , 1 : nrow( Bsvd$u ), drop = FALSE ] %*% Bsvd$u[ , 1 : d_org, drop = FALSE ]
-    v <- V[ , 1 : nrow( Bsvd$v ), drop = FALSE ] %*% Bsvd$v[ , 1 : d_org, drop = FALSE ]
-    return( list( d = d, u = u, v = v, iter = iter ) )
+    d <- Bsvd$d[seq_len(d_org)]
+    u <- W[, seq_len(nrow(Bsvd$u))] %*% Bsvd$u[, seq_len(d_org)]
+    v <- V[, seq_len(nrow(Bsvd$v))] %*% Bsvd$v[, seq_len(d_org)]
+    return(list(d = d, u = u, v = v, iter = iter))
 }
 
-norm <- function(x)
-    return( sqrt( drop( crossprod( x ) ) ) )
+.trunc_svd_iter <- function(A, V, W, B, Smax, d, d_org, iter, tol) {
+    j <- 1
+    if (iter != 1) 
+        j <- d + 1
+    W[, j] <- .Call("mv_c", A, V[, j]) # W=AV
+    if (iter != 1)
+        W[, j] <- .orthog(W[, j], W[, seq_len(j) - 1])
+    S <- .norm(W[, j])
+    if (S < tol) { # normalize W and check for dependent vectors
+        W <- .new_col_ortho_unit(W, j)
+        S <- 0
+    } else W[, j] <- W[, j]/S
+    # lanczos steps
+    while (j <= ncol(W)) {
+        G <- .Call("tmv_c", A, W[, j]) - S * V[, j]
+        G <- .orthog(G, V[, seq_len(j)])
+        if (j + 1 <= ncol(W)) { # while not the 'edge' of the bidiag matrix
+            R <- .norm(G)
+            if (R <= tol) { # check for dependence
+                V <- .new_col_ortho_unit(V, j + 1)
+                G <- V[, j + 1]
+                R <- 0
+            } else V[, j + 1] <- G/R
+            if (is.null(B)) {
+                B <- cbind(S, R) # make block diag matrix
+            } else B <- rbind(cbind(B, 0), c(rep(0, j - 1), S, R))
+            W[, j + 1] <- .Call("mv_c", A, V[, j + 1]) - W[, j] * R
+            if (iter == 1)
+                W[, j + 1] <- .orthog(W[, j + 1], W[, seq_len(j)])
+            S <- .norm(W[, j + 1])
+            if (S <= tol) {
+                W <- .new_col_ortho_unit(W, j + 1)
+                S <- 0
+            } else W[, j + 1] <- W[, j + 1]/S
+        } else B <- rbind(B, c(rep(0, j - 1), S)) # add block
+        j <- j + 1
+    }
+    Bsz <- nrow(B)
+    R_F <- .norm(G)
+    G <- G/R_F
+    Bsvd <- svd(B) # SVD of bidiag matrix
+    Smax <- max(Smax, Bsvd$d[1], tol^(2/3))
+    R <- R_F * Bsvd$u[Bsz, ] # compute residuals
+    ct <- .convtests(Bsz, tol, d_org, abs(R), d, Smax) # check convergence
+    return(c(ct, list(V=V, W=W, B=B, G=G, R=R, Bsvd=Bsvd, Smax=Smax)))
+}
 
-unit_vector <- function(x)
-    return( x / norm( x ) )
+# replace column with random data!
+.new_col_ortho_unit <- function(W, j) {
+    # new column with random data
+    Wj <- stats::rnorm(nrow(W))
+    # remove projection to existing data in W (cols < j).
+    # Nothing to do if j==1
+    if (j > 1)
+        Wj <- .orthog(Wj, W[, seq_len(j-1)])
+    # unit normalize and store in desired column
+    W[, j] <- Wj/.norm(Wj)
+    return(W) # return whole matrix
+}
 
-orthog <- function(Y, X)
-    return( Y - X %*% crossprod( X, Y ) )
-
+# these work just fine if x/X/Y are dropped to vectors
+.norm <- function(x) return(sqrt(drop(crossprod(x))))
+.orthog <- function(Y, X) return(Y - X %*% crossprod(X, Y))
