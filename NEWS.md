@@ -98,7 +98,7 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
     - Lengthened "Description" paragraph.
     - Increased R dependency from 3.2 to 4.0.
   - Updated `README.md`.
-  - Reformatted this `NEWS.md` slighly to improve its automatic parsing.
+  - Reformatted this `NEWS.md` slightly to improve its automatic parsing.
   - Added published paper citation to vignette, `README.md`, `inst/CITATION`.
     - First two used to point to arXiv preprint, last one didn't exist.
   - Updated vignette to reflect that `read.bed` has been removed.
@@ -116,3 +116,10 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
     - Removed unexported function `inverse_2x2`, probably speeding up `sHWE` slightly.
 	- Removed unexported function `mv` (all instances called C code directly instead of this R wrapper).
     - Cleaned up `trunc_svd` source considerably.
+
+# lfa 2.0.8 (2021-06-18)
+
+- Minor updates:
+  - Added `LICENSE.md`.
+  - Edits to `README.md`.
+  - Vignette now also suggests `BEDMatrix` for loading data.

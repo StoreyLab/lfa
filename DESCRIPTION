@@ -1,6 +1,6 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.0.7
+Version: 2.0.8
 Authors@R: c(
     person(given = "Wei",
 	   family = "Hao",
@@ -37,7 +37,7 @@ Suggests:
     BEDMatrix,
     genio
 VignetteBuilder: knitr
-License: GPL-3
+License: GPL (>= 3)
 biocViews: SNP, DimensionReduction, PrincipalComponent, Regression
 BugReports: https://github.com/StoreyLab/lfa/issues
 URL: https://github.com/StoreyLab/lfa

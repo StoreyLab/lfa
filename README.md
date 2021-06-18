@@ -19,7 +19,7 @@ install.packages("devtools")
 library("devtools")
 install_github("Storeylab/lfa")
 ```
-Apple OS X users, see FAQ below.
+Apple OS X users, see Troubleshooting below.
 
 ## Data input
 
@@ -33,7 +33,7 @@ As a rule of thumb, the in memory sizes of a few relevant genotype matrices:
 
 `BEDMatrix` inputs consume much less memory but can be slower otherwise.
 
-## Troubleshoot
+## Troubleshooting
 
 Apple OS X users may experience a problem due to Fortran code that is included in this package. You must install the X code command line tools (XCode CLI) and `gfortran`.  Try the following commands on terminal:
 
@@ -48,5 +48,5 @@ Alternatively, this Installer Package for macOS R toolchain may work https://git
 
 ## Citations
 
-Hao, Wei, Minsun Song, and John D. Storey. "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies." Bioinformatics (Oxford, England) 32, no. 5 (March 1, 2016): 713–21. [doi:10.1093/bioinformatics/btv641](https://doi.org/10.1093/bioinformatics/btv641). [arXiv](http://arxiv.org/abs/1312.2041).
+Hao, Wei, Minsun Song, and John D. Storey. "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies." Bioinformatics 32, no. 5 (March 1, 2016): 713–21. [doi:10.1093/bioinformatics/btv641](https://doi.org/10.1093/bioinformatics/btv641). [arXiv](http://arxiv.org/abs/1312.2041).
 

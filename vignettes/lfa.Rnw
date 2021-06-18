@@ -114,6 +114,8 @@ formatted genotypes. The binary PLINK format uses files: a \texttt{.bed} for
 the genotypes, a \texttt{.bim} for the genotype information, and a 
 \texttt{.fam} for the individuals information.
 \texttt{read\_plink} takes as an argument the prefix for your three files.
+A \texttt{BEDMatrix} object (from the eponymous function and package) is also 
+supported, and can result in reduced memory usage (at a small runtime penalty).
 
 \bibliographystyle{plain}
 \bibliography{lfa}
