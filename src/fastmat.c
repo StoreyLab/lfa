@@ -19,7 +19,7 @@ SEXP mv_c(SEXP RA, SEXP Rv){
     double zero = 0.0;
     char tr = 'N';
     int one = 1;
-    F77_CALL(dgemv)(&tr,dimA,dimA+1,&alpha,A,dimA,v,&one,&zero,ret,&one);
+    F77_CALL(dgemv)(&tr,dimA,dimA+1,&alpha,A,dimA,v,&one,&zero,ret,&one FCONE);
 
     UNPROTECT(3);
 
@@ -45,7 +45,7 @@ SEXP tmv_c(SEXP RA, SEXP Rv){
     double zero = 0.0;
     char tr = 'T';
     int one = 1;
-    F77_CALL(dgemv)(&tr,dimA,dimA+1,&alpha,A,dimA,v,&one,&zero,ret,&one);
+    F77_CALL(dgemv)(&tr,dimA,dimA+1,&alpha,A,dimA,v,&one,&zero,ret,&one FCONE);
 
     UNPROTECT(3);
 

@@ -123,3 +123,28 @@ Error in while ((i2 <= B0) & (obs_stat[i1] >= stat0[i2])) { :
   - Added `LICENSE.md`.
   - Edits to `README.md`.
   - Vignette now also suggests `BEDMatrix` for loading data.
+
+# lfa 2.0.9 (2022-11-11)
+
+- Fixed critical bug that prevented compilation of C code in latest R-devel.
+  Documenting here path that led to debugging as it may be informative to maintainers of other packages that have written similar code.
+  - Here's error message, abbreviated:
+```
+fastmat.c: In function ‘mv’:
+fastmat.c:22:14: error: too few arguments to function ‘dgemv_’
+   22 |     F77_CALL(dgemv)(&tr,dimA,dimA+1,&alpha,A,dimA,v,&one,&zero,ret,&one);
+      |              ^~~~~
+/home/biocbuild/bbs-3.17-bioc/R/include/R_ext/RS.h:77:25: note: in definition of macro ‘F77_CALL’
+   77 | # define F77_CALL(x)    x ## _
+      |                         ^
+/home/biocbuild/bbs-3.17-bioc/R/include/R_ext/BLAS.h:107:10: note: declared here
+  107 | F77_NAME(dgemv)(const char *trans, const int *m, const int *n,
+      |          ^~~~~
+...
+make: *** [/home/biocbuild/bbs-3.17-bioc/R/etc/Makeconf:176: fastmat.o] Error 1
+ERROR: compilation failed for package ‘lfa’
+```
+  - Bug manifested after R-devel commit r82062 (2022-04-02): `R CMD check --as-cran now uses FC_LEN_T` (I was testing locally using `--as-cran`, perhaps it manifests later otherwise.)
+  - Googling for `FC_LEN_T` led me to R news, which pointed me to [Writing R Extensions: 6.6.1 Fortran character strings](https://cran.r-project.org/doc/manuals/R-exts.html#Fortran-character-strings), which shows that an argument of type `FC_LEN_T` now has to be added to specify the length of a string passed to Fortran code.
+  - Eventually text-searched for `dgemv` in the R source code and came across `array.c` examples where it sufficed to append the C macro `FCONE` to my existing `dgemv` call, and that solves it!
+    (`FCONE`, defined in `R_ext/BLAS.h`, equal to `,(FC_LEN_T)1` if `FC_LEN_T` has been defined, otherwise it is blank.)

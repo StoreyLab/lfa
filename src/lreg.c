@@ -46,7 +46,7 @@ SEXP lreg_c(SEXP RX, SEXP Ry, SEXP Rmi, SEXP Rtol){
     while(iter <= maxiter){
         ///////////////////////////////////////////////////////////////////////
         //p <- as.vector(1/(1 + exp(-X %*% b)))
-        F77_CALL(dgemv)(&tr,dimX,dimX+1,&alpha,X,dimX,b,&ione,&zero,p,&ione);
+        F77_CALL(dgemv)(&tr,dimX,dimX+1,&alpha,X,dimX,b,&ione,&zero,p,&ione FCONE);
         for(i = 0; i < dimX[0]; i++) 
             p[i] = 1/(1+exp(p[i]));
         
@@ -117,7 +117,7 @@ SEXP lreg_c(SEXP RX, SEXP Ry, SEXP Rmi, SEXP Rtol){
             }
         }
 
-        F77_CALL(dgemv)(&tr,dimX+1,dimX+1,&one,w,dimX+1,f,&ione,&one,b,&ione);
+        F77_CALL(dgemv)(&tr,dimX+1,dimX+1,&one,w,dimX+1,f,&ione,&one,b,&ione FCONE);
         
         
         ///////////////////////////////////////////////////////////////////////
