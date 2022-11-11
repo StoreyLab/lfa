@@ -4,7 +4,7 @@
 #' Compute structural Hardy-Weinberg Equilibrium (sHWE) p-values
 #' on a SNP-by-SNP basis. These p-values can be aggregated to 
 #' determine genome-wide goodness-of-fit for a particular value
-#' of `d`. See <https://doi.org/10.1101/240804> for more
+#' of `d`. See \doi{10.1101/240804} for more
 #' details.
 #'
 #' @param LF matrix of logistic factors

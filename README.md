@@ -48,5 +48,5 @@ Alternatively, this Installer Package for macOS R toolchain may work https://git
 
 ## Citations
 
-Hao, Wei, Minsun Song, and John D. Storey. "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies." Bioinformatics 32, no. 5 (March 1, 2016): 713–21. [doi:10.1093/bioinformatics/btv641](https://doi.org/10.1093/bioinformatics/btv641). [arXiv](http://arxiv.org/abs/1312.2041).
+Hao, Wei, Minsun Song, and John D. Storey. "Probabilistic Models of Genetic Variation in Structured Populations Applied to Global Human Studies." Bioinformatics 32, no. 5 (March 1, 2016): 713–21. [doi:10.1093/bioinformatics/btv641](https://doi.org/10.1093/bioinformatics/btv641). [arXiv](https://arxiv.org/abs/1312.2041).
 

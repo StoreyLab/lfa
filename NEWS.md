@@ -148,3 +148,10 @@ ERROR: compilation failed for package ‘lfa’
   - Googling for `FC_LEN_T` led me to R news, which pointed me to [Writing R Extensions: 6.6.1 Fortran character strings](https://cran.r-project.org/doc/manuals/R-exts.html#Fortran-character-strings), which shows that an argument of type `FC_LEN_T` now has to be added to specify the length of a string passed to Fortran code.
   - Eventually text-searched for `dgemv` in the R source code and came across `array.c` examples where it sufficed to append the C macro `FCONE` to my existing `dgemv` call, and that solves it!
     (`FCONE`, defined in `R_ext/BLAS.h`, equal to `,(FC_LEN_T)1` if `FC_LEN_T` has been defined, otherwise it is blank.)
+
+# lfa 2.0.10 (2022-11-11)
+
+- Minor non-code updates to fix check `--as-cran` notes:
+  - Package description cannot start with package name.
+  - `README.md` updated an `http` link to `https` to which it redirects.
+  - Function `sHWE` documentation used `\doi` instead of direct link.
