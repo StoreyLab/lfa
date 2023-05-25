@@ -1,6 +1,6 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.0.10
+Version: 2.1.10
 Authors@R: c(
     person(given = "Wei",
 	   family = "Hao",
@@ -42,4 +42,4 @@ biocViews: SNP, DimensionReduction, PrincipalComponent, Regression
 BugReports: https://github.com/StoreyLab/lfa/issues
 URL: https://github.com/StoreyLab/lfa
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

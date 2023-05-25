@@ -155,3 +155,7 @@ ERROR: compilation failed for package ‘lfa’
   - Package description cannot start with package name.
   - `README.md` updated an `http` link to `https` to which it redirects.
   - Function `sHWE` documentation used `\doi` instead of direct link.
+
+# lfa 2.1.10 (2023-05-25)
+
+- Version bump for bioconductor devel.
