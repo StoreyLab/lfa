@@ -155,3 +155,8 @@ ERROR: compilation failed for package ‘lfa’
   - Package description cannot start with package name.
   - `README.md` updated an `http` link to `https` to which it redirects.
   - Function `sHWE` documentation used `\doi` instead of direct link.
+
+# lfa 2.0.11 (2023-06-20)
+
+- Commented out excessive test for internal function `.lreg` against `glm`, which differ more often than expected due to poor or lack of convergence.
+- Removed unused LaTeX package dependencies from vignette to prevent errors restricted to specific testing platforms.

@@ -5,15 +5,15 @@
 \title{Logistic factor analysis}
 \usage{
 lfa(
-    X,
-    d,
-    adjustments = NULL,
-    override = FALSE,
-    safety = FALSE,
-    rspectra = FALSE,
-    ploidy = 2,
-    tol = .Machine$double.eps,
-    m_chunk = 1000
+  X,
+  d,
+  adjustments = NULL,
+  override = FALSE,
+  safety = FALSE,
+  rspectra = FALSE,
+  ploidy = 2,
+  tol = .Machine$double.eps,
+  m_chunk = 1000
 )
 }
 \arguments{

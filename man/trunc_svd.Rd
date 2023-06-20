@@ -5,13 +5,13 @@
 \title{Truncated singular value decomposition}
 \usage{
 trunc_svd(
-    A,
-    d,
-    adjust = 3,
-    tol = .Machine$double.eps,
-    override = FALSE,
-    force = FALSE,
-    maxit = 1000
+  A,
+  d,
+  adjust = 3,
+  tol = .Machine$double.eps,
+  override = FALSE,
+  force = FALSE,
+  maxit = 1000
 )
 }
 \arguments{
