@@ -159,3 +159,8 @@ ERROR: compilation failed for package ‘lfa’
 # lfa 2.1.10 (2023-05-25)
 
 - Version bump for bioconductor devel.
+
+# lfa 2.1.11 (2023-06-20)
+
+- Commented out excessive test for internal function `.lreg` against `glm`, which differ more often than expected due to poor or lack of convergence.
+- Removed unused LaTeX package dependencies from vignette to prevent errors restricted to specific testing platforms.

@@ -3,22 +3,8 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{lfa Package}
 
-\usepackage{tikz}
-\usepackage{float}
-\usepackage{gensymb}
-\usepackage{times}
-\usepackage{graphicx}
-\usepackage{url}
 \usepackage{fullpage}
-\usepackage{float}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{bm}
-%\usepackage{bbm}
-%\usepackage{enumerate}
-\usepackage[font=small,format=plain,labelfont=bf,up,textfont=up]{caption}
 \usepackage{hyperref}
-\usepackage{subfig}
 
 \title{Logistic Factor Analysis Vignette}
 \author{Wei Hao, Minsun Song, John D. Storey}
