@@ -1,6 +1,6 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.1.11
+Version: 2.2.0
 Authors@R: c(
     person(given = "Wei",
 	   family = "Hao",
