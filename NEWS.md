@@ -168,5 +168,7 @@ ERROR: compilation failed for package ‘lfa’
 # lfa 2.11.1 (2026-01-28)
 
 - Function `sHWE` greatly reduced memory handling for `BEDMatrix` inputs by writing random genotypes to temporary plink1 BED files.
-  - To achieve this, now `BEDMatrix` and `genio` are required dependencies (used to be "suggests").
+  - Packages `BEDMatrix` and `genio` are now in "imports" (used to be "suggests").
   - Added option `m_chunk` to write temporary random genotypes in large chunks for favorable I/O.
+- Functions switched from deprecated to defunct: `read.bed`, `read.tped.recode`, `model.gof`, `center`
+  - Package `utils` removed from "imports"
