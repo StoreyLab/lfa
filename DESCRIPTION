@@ -1,6 +1,6 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.11.1
+Version: 2.11.2
 Authors@R: c(
     person(given = "Wei",
 	   family = "Hao",
@@ -33,6 +33,7 @@ Depends:
     R (>= 4.0)
 Suggests:
     knitr,
+    rmarkdown,
     ggplot2,
     testthat
 VignetteBuilder: knitr

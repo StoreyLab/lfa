@@ -172,3 +172,7 @@ ERROR: compilation failed for package ‘lfa’
   - Added option `m_chunk` to write temporary random genotypes in large chunks for favorable I/O.
 - Functions switched from deprecated to defunct: `read.bed`, `read.tped.recode`, `model.gof`, `center`
   - Package `utils` removed from "imports"
+
+# lfa 2.11.2 (2026-01-28)
+
+- Updated vignette from old Sweave to modern R markdown.
