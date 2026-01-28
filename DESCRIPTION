@@ -1,6 +1,6 @@
 Package: lfa
 Title: Logistic Factor Analysis for Categorical Data
-Version: 2.11.0
+Version: 2.11.1
 Authors@R: c(
     person(given = "Wei",
 	   family = "Hao",
@@ -27,19 +27,19 @@ Imports:
     utils,
     methods,
     corpcor,
-    RSpectra
+    RSpectra,
+    BEDMatrix,
+    genio
 Depends:
     R (>= 4.0)
 Suggests:
     knitr,
     ggplot2,
-    testthat,
-    BEDMatrix,
-    genio
+    testthat
 VignetteBuilder: knitr
 License: GPL (>= 3)
 biocViews: SNP, DimensionReduction, PrincipalComponent, Regression
 BugReports: https://github.com/StoreyLab/lfa/issues
 URL: https://github.com/StoreyLab/lfa
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3

@@ -25,7 +25,7 @@
 #' hist(gof_10)
 #' @return a vector of p-values for each SNP.
 #' @export
-sHWE <- function(X, LF, B, max_iter = 100, tol = 1e-10) {
+sHWE <- function(X, LF, B, max_iter = 100, tol = 1e-10, m_chunk = 1000) {
     if (missing(X))
         stop("Genotype matrix `X` is required!")
     if (missing(LF))
@@ -37,29 +37,17 @@ sHWE <- function(X, LF, B, max_iter = 100, tol = 1e-10) {
     if (!is.matrix(X)) # BEDMatrix returns TRUE
         stop("`X` must be a matrix!")
 
-    # get dimensions
-    if (methods::is(X, "BEDMatrix")) {
-        m <- ncol(X)
-        n <- nrow(X)
-    } else {
-        n <- ncol(X)
-        m <- nrow(X)
-    }
-
     # dimensions should agree
+    n <- if (methods::is(X, "BEDMatrix")) nrow(X) else ncol(X)
     if (n != nrow(LF))
         stop("Number of individuals in `X` and `LF` disagrees!")
 
     # calculate observed stats across matrix
-    stats1 <- .gof_stat(X, LF, max_iter=max_iter, tol=tol)
+    stats1 <- .gof_stat( X, LF, max_iter = max_iter, tol = tol )
 
     # to create null statistics, get P matrix, then simulate data from it
-    d <- ncol(LF)
-    # this already works on BEDMatrix, but produces this large matrix!
-    P <- af(X, LF)
-    rm(X)
-    stats0 <- .compute_nulls(P, d, B, max_iter=max_iter, tol=tol)
-
+    stats0 <- .compute_nulls( X, LF, B, max_iter = max_iter, tol = tol, m_chunk = m_chunk )
+    
     # calculate empirical p-values based on these distributions
     pvals <- .pvals_empir(stats1, stats0)
 

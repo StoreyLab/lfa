@@ -388,11 +388,9 @@ test_that( ".compute_nulls works", {
     B <- 2
     # first compute LFs
     LFs <- lfa( X = X, d = d )
-    # then compute allele frequencies
-    P <- af( X = X, LF = LFs )
     # now test begins
     expect_silent(
-        stat0 <- .compute_nulls(P = P, d = d, B = B)
+        stat0 <- .compute_nulls( X = X, LF = LFs, B = B )
     )
     # test return value
     expect_true( is.matrix( stat0 ) )
@@ -606,19 +604,16 @@ if (
         # just use default suggestion
         B <- 1
 
-        # get ordinary output
-        set.seed( 1 )
-        pvals_basic <- sHWE( X = X, LF = LFs, B = B )
+        # NOTE: used to compare regular and BM versions directly, but randomness is now different even when setting seeds, so answers are not quite the same anymore, though for small cases it's close enough (no longer testing that, success was unreliable)
         
         # get BEDMatrix version
-        set.seed( 1 ) # reset seed first, so random draws are reproduced
         expect_silent(
-            pvals_BM <- sHWE( X = X_BEDMatrix, LF = LFs, B = B )
+            pvals <- sHWE( X = X_BEDMatrix, LF = LFs, B = B )
         )
-        expect_equal( pvals_basic, pvals_BM )
-
-        # let randomness happen again
-        set.seed( NULL )
+        # test output dimensions, etc
+        expect_equal( length( pvals ), m_loci )
+        expect_true( max( pvals, na.rm = TRUE ) <= 1 )
+        expect_true( min( pvals, na.rm = TRUE ) >= 0 )
     })
     
     # delete temporary data when done

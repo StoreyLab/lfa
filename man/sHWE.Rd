@@ -4,7 +4,7 @@
 \alias{sHWE}
 \title{Hardy-Weinberg Equilibrium in structure populations}
 \usage{
-sHWE(X, LF, B, max_iter = 100, tol = 1e-10)
+sHWE(X, LF, B, max_iter = 100, tol = 1e-10, m_chunk = 1000)
 }
 \arguments{
 \item{X}{A matrix of SNP genotypes, i.e. an integer matrix of 0's,
@@ -22,6 +22,9 @@ sufficient. If computational time/power allows, a few extra
 
 \item{tol}{Tolerance value passed to \code{\link[=trunc_svd]{trunc_svd()}}
 Ignored if \code{X} is a BEDMatrix object.}
+
+\item{m_chunk}{If \code{X} is a BEDMatrix object, number of loci to read per
+chunk (to control memory usage).}
 }
 \value{
 a vector of p-values for each SNP.

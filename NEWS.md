@@ -164,3 +164,9 @@ ERROR: compilation failed for package ‘lfa’
 
 - Commented out excessive test for internal function `.lreg` against `glm`, which differ more often than expected due to poor or lack of convergence.
 - Removed unused LaTeX package dependencies from vignette to prevent errors restricted to specific testing platforms.
+
+# lfa 2.11.1 (2026-01-28)
+
+- Function `sHWE` greatly reduced memory handling for `BEDMatrix` inputs by writing random genotypes to temporary plink1 BED files.
+  - To achieve this, now `BEDMatrix` and `genio` are required dependencies (used to be "suggests").
+  - Added option `m_chunk` to write temporary random genotypes in large chunks for favorable I/O.
