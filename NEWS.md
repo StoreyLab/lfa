@@ -176,3 +176,7 @@ ERROR: compilation failed for package ‘lfa’
 # lfa 2.11.2 (2026-01-28)
 
 - Updated vignette from old Sweave to modern R markdown.
+
+# lfa 2.11.3 (2026-01-29)
+
+- Function `sHWE` for `BEDMatrix` inputs now deletes temporary files after they are no longer needed

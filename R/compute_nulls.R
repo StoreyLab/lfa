@@ -74,6 +74,12 @@
             LF0 <- lfa( X0, d )
             # this calculates stats correctly, even when X0 is BEDMatrix!
             stats0[, b] <- .gof_stat( X0, LF0, max_iter = max_iter, tol = tol )
+
+            # we can delete this temp file once done!
+            # NOTE: on Windows there's a peculiar issue, that these temporary files cannot be removed because BEDMatrix left them "open", silence those warnings!
+            X0 <- NULL
+            # try to delete, ignore warnings if it failed
+            invisible( suppressWarnings( file.remove( files_rand[b] ) ) )
         }
         
     } else {
